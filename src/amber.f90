@@ -1,6 +1,6 @@
 ! AMBER  :  Abundance Matching Box for the Epoch of Reionization
 ! Compile:  make clean; make
-! Execute:  ./amber.x < Input/input.txt > Output/log
+! Execute:  ./amber.x < input/input.txt > output/log
 
 
 program main
