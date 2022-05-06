@@ -29,16 +29,16 @@ CMB parameters are set in input/input.txt
 
 ## Output
 
-output/cmb/tau.txt is the Thomson optical depth tau(z).
+output/cmb/tau.txt is the Thomson optical depth tau(z)
 
 First line is a header. The three columns are:
 1) z = redshift
-2) x_e = electron ionization fraction
+2) xe = electron ionization fraction x_e = n_e/n_H
 3) tau = integrated Thomson optical depth
 
 <br>
 
-output/cmb/power_z=xx.xx.txt are power spectra P(k).
+output/cmb/power_z=xx.xx.txt are power spectra P(k)
 
 First line is a header. The three columns are:
 1) k = comoving wavenumber [h/Mpc]
@@ -47,7 +47,7 @@ First line is a header. The three columns are:
 
 <br>
 
-output/cmb/Cl_tau_z=xx.xx.txt is patchy tau angular power spectrum C_l.
+output/cmb/Cl_tau_z=xx.xx.txt is the patchy tau angular power spectrum C_l
 
 First line is a header. The two columns are:
 1) l = multipole
@@ -55,7 +55,7 @@ First line is a header. The two columns are:
 
 <br>
 
-output/cmb/Cl_ksz_z=xx.xx.txt is patchy KSZ angular power spectrum C_l.
+output/cmb/Cl_ksz_z=xx.xx.txt is the patchy KSZ angular power spectrum C_l
 
 First line is a header. The two columns are:
 1) l = multipole
