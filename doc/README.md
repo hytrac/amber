@@ -18,9 +18,35 @@ To execute and save to log file:  ./amber.x < input/input.txt > output/log
 
 <br>
 
+## Simulation
+
+Simulation parameters are set in input.txt
+
+1) ncore = number of cores (OpenMP threads)
+2) input = input directory
+3) output = output directory
+
+<br>
+
 ## Cosmology
 
 Cosmological parameters are set in input.txt
+
+1) Lbox = comoving sim box length [Mpc/h]
+2) om = matter density omega_m
+3) ol = lambda density omega_l
+4) ob = baryon density omega_b
+5) or = radiation density omega_r
+6) h = hubble constant h_0
+7) s8 = sigma_8
+8) ns = spectral index n_s
+9) -1                              # w
+2.725                           # T_cmb
+0.76                            # X hydrogen fraction
+0.24                            # Y Helium fraction
+linpowspec.txt                  # Linear power spectrum file
+cosmo                           # Directory
+
 
 <br>
 
