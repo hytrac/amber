@@ -1,0 +1,74 @@
+#-------------------------------------------------------------------------------
+# SIMULATION
+16				# Number of core
+input				# Directory for inputs
+output				# Directory for outputs
+#-------------------------------------------------------------------------------
+# COSMO
+1000				# Box length [Mpc/h]
+0.3				# Omega_m
+0.7                     	# Omega_l
+0.045                   	# Omega_b
+8.5E-5                  	# Omega_r
+0.70                    	# h
+0.8                     	# sigma_8
+0.96                    	# n_s
+-1                      	# w
+2.725                   	# T_cmb
+0.76                    	# X hydrogen fraction
+0.24                    	# Y Helium fraction
+linpowspec.txt			# Linear power spectrum file
+cosmo				# Directory
+#-------------------------------------------------------------------------------
+# REIONIZATION
+make				# make, read, write
+8.00				# Midpoint redshift
+4.00				# Duration
+3.00				# Asymmetry
+0.05				# Ion frac early
+0.50				# Ion frac mid
+0.95				# Ion frac late
+1E8                             # Minimum halo mass [Msolar/h]
+3.0				# Mean free path [Mpc/h]
+reion				# Directory
+#-------------------------------------------------------------------------------
+# GRF
+make				# make, read, write
+1				# integer seed for GRF
+grf				# Directory
+#-------------------------------------------------------------------------------
+# LPT
+make				# make, read, write
+2lpt				# Order: 1lpt, 2lpt
+tsc				# Assign: tsc, cic, ngp
+lpt				# Directory
+#-------------------------------------------------------------------------------
+# ESF
+make				# make, read, write
+sharpk				# Filter: sharpk, tophat
+tsc				# Assign: tsc, cic, ngp
+esf				# Directory
+#-------------------------------------------------------------------------------
+# Mesh
+make				# make, read, write
+1024				# Number of cells/particles per side length
+mesh				# Directory
+#-------------------------------------------------------------------------------
+# CMB
+no				# make, write
+5.0				# z min
+20.0				# z max
+0.1				# z del
+log				# z spacing: lin, log
+100				# l min
+10000				# l max
+cmb				# Directory
+#-------------------------------------------------------------------------------
+# 21cm
+yes                             # make, write
+5.5                             # z min
+15.5				# z max
+1.0                             # z del
+lin                             # z spacing: lin, log
+21cm				# Directory
+#------------------------------------------------------------------------------\
