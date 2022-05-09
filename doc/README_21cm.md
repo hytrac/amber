@@ -1,6 +1,6 @@
 # 21cm
 
-The 21cm module contains simple subroutines to approximately compute the global brightness temperature T_b(z) and power spectrum P_TT(k). We assume T_s >> T_cmb and ignore peculiar vel, lightcone effects.
+The 21cm module contains example subroutines to approximately compute the global brightness temperature T_b(z) and power spectrum P_TT(k), assuming T_s >> T_cmb and ignoring peculiar vel, lightcone effects.
 
 <br>
 
@@ -12,7 +12,7 @@ h21cm.f90, h21cmreion.f90
 
 ## Input
 
-21cm parameters are set in input/input.txt
+21cm parameters are set in input/input.txt.
 
 1) make = make, write, or null
 2) zmin = minimum redshift
@@ -25,7 +25,7 @@ h21cm.f90, h21cmreion.f90
 
 ## Output
 
-output/21cm/21cm_global.txt is the global brightness temperature T_b(z)
+output/21cm/21cm_global.txt is the global brightness temperature T_b(z).
 
 First line is a header. The three columns are:
 1) z = redshift
@@ -34,7 +34,7 @@ First line is a header. The three columns are:
 
 <br>
 
-output/21cm/power_z=xx.xx.txt is the power spectrum P(k)
+output/21cm/power_z=xx.xx.txt is the power spectrum P(k).
 
 First line is a header. The two columns are:
 1) k = comoving wavenumber [h/Mpc]
