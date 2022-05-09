@@ -1,6 +1,6 @@
 # CMB
 
-The CMB module computes tau(z), P_ee(k), P_qq(k), C_tau(l), and C_ksz(l).
+The CMB module computes tau(z), P_ee(k), P_qq(k), C_tau(l), and C_ksz(l). Note electron ionization fraction x_e = n_e/n_e,tot.
 
 We will add subroutines for making Healpix maps soon.
 
@@ -14,7 +14,7 @@ cmb.f90, cmbreion.f90
 
 ## Input
 
-CMB parameters are set in input/input.txt
+CMB parameters are set in input/input.txt.
 
 1) make = make, write, or null
 2) zmin = minimum redshift
@@ -29,7 +29,7 @@ CMB parameters are set in input/input.txt
 
 ## Output
 
-output/cmb/tau.txt is the Thomson optical depth tau(z)
+output/cmb/tau.txt is the Thomson optical depth tau(z).
 
 First line is a header. The three columns are:
 1) z = redshift
@@ -49,7 +49,7 @@ First line is a header. The three columns are:
 
 <br>
 
-output/cmb/Cl_tau_z=xx.xx.txt is the patchy tau angular power spectrum C_l
+output/cmb/Cl_tau_z=xx.xx.txt is the patchy tau angular power spectrum C_l.
 
 First line is a header. The two columns are:
 1) l = multipole
@@ -57,7 +57,7 @@ First line is a header. The two columns are:
 
 <br>
 
-output/cmb/Cl_ksz_z=xx.xx.txt is the patchy KSZ angular power spectrum C_l
+output/cmb/Cl_ksz_z=xx.xx.txt is the patchy KSZ angular power spectrum C_l.
 
 First line is a header. The two columns are:
 1) l = multipole
