@@ -18,7 +18,7 @@ Requires Intel ifort compiler and Math Kernel Library (MKL).
 
 To compile from scratch:  make clean; make
 
-To execute and save to log file:  ./amber.x < input/input.txt > output/log
+To execute and save to log file:  ./amber.x < input/input.txt > output/log.txt
 
 <br>
 
