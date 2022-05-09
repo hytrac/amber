@@ -106,7 +106,7 @@ contains
        z1 = z - dz/2
        z2 = z + dz/2
        
-       ! Electron ionization fraction
+       ! Electron ionization fraction: xe = ne/ne_tot
        xe = xe_of_z(z2)
 
        ! Thomson optical depth
@@ -313,8 +313,9 @@ contains
       powq = 0
 
 
-      ! Electron ionization fraction, xe = ne/nH
-      xe = 1 + cosmo%YHe/4/cosmo%XH
+      ! Electron ionization fraction, xe = ne/ne_tot
+      ! H ionized, He singly ionized
+      xe = (1 + cosmo%YHe/(4*cosmo%XH))/(1 + cosmo%YHe/(2*cosmo%XH))
 
 
       ! FFT
@@ -547,9 +548,8 @@ contains
       k = cmb%l/r
       call spline_cubic(cmb%k,cmb%Pee,k,p)
 
-      ! nH0 instead of ne0 cause xe = ne/nH
       ! (Mpc/h)^2: (Mpc/h)^3 from Pee, (Mpc/h)^-1 from dr/r^2
-      Atau = (sT_cgs*cosmo%nH0)**2*(Mpc2cm/cosmo%h)**2
+      Atau = (sT_cgs*cosmo%ne0)**2*(Mpc2cm/cosmo%h)**2
 
       ! Integrate/sum
       cmb%Ctau = cmb%Ctau + Atau*p/(r**2*a**4)*dr      
@@ -562,10 +562,9 @@ contains
       k = cmb%l/r
       call spline_cubic(cmb%k,cmb%Pqq,k,p)
 
-      ! nH0 instead of ne0 cause xe = ne/nH
       ! (Mpc/h)^2: (Mpc/h)^3 from Pqq, (Mpc/h)^-1 from dr/r^2
       ! (1E5)^2  : (km/s)^2  from Pqq
-      Aksz = (sT_cgs*cosmo%nH0/c_cgs)**2*(Mpc2cm/cosmo%h)**2*(1E5)**2
+      Aksz = (sT_cgs*cosmo%ne0/c_cgs)**2*(Mpc2cm/cosmo%h)**2*(1E5)**2
 
       ! Integrate/sum
       cmb%Cksz = cmb%Cksz + Aksz*(p/2)*exp(-2*tau)/(r**2*a**4)*dr

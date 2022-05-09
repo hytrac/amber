@@ -9,7 +9,6 @@ module mkl_module
   use IFPORT
   use MKL_DF
   use MKL_DFTI
-  use MKL_VSL_TYPE
   use MKL_VSL
   use OMP_LIB
   use, intrinsic :: iso_c_binding

@@ -188,16 +188,17 @@ contains
     real(8) :: xe_of_z
 
 
-    ! Electron ionization fraction: xe = ne/nH
+    ! Electron ionization fraction: xe = ne/ne_tot
     if (z > reion%zend) then
        ! EoR
-       xe_of_z = (1 + cosmo%YHe/(4*cosmo%XH))*xi_of_z(z)
+       xe_of_z = xi_of_z(z) &
+               * (1 + cosmo%YHe/(4*cosmo%XH))/(1 + cosmo%YHe/(2*cosmo%XH))
     else if (z > 3) then
        ! H ionized, He singly ionized
-       xe_of_z =  1 + cosmo%YHe/(4*cosmo%XH)
+       xe_of_z = (1 + cosmo%YHe/(4*cosmo%XH))/(1 + cosmo%YHe/(2*cosmo%XH))
     else
        ! H ionized, He doubly ionized
-       xe_of_z =  1 + cosmo%YHe/(2*cosmo%XH)
+       xe_of_z =  1
     endif
 
     
@@ -259,7 +260,7 @@ contains
         * sqrt(cosmo%or/a**4 + cosmo%om/a**3 + cosmo%ol/a**(3*(1+cosmo%w)))
 
       ! Comoving electron number density in g/cm^3
-      ne0 = xe_of_z(z)*cosmo%nH0
+      ne0 = xe_of_z(z)*cosmo%ne0
 
       ! tau integrand
       dtau_da = sT_cgs*ne0*(c_cgs/H)/a**4
