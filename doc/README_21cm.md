@@ -1,16 +1,21 @@
-# 21cm
+# Table of Contents
+1) [About](about)
+2) [Source](source)
+3) [Input](input)
+4) [Output](output)
+5) [References](refs)
 
+
+# About <a name="about"></a>
 The 21cm module contains example subroutines to approximately compute the global brightness temperature T_b(z) and power spectrum P_TT(k), assuming T_s >> T_cmb and ignoring peculiar vel, lightcone effects.
 
-<br>
 
-## Source
+# Source <a name="source"></a>
 
 h21cm.f90, h21cmreion.f90
 
-<br>
 
-## Input
+# Input <a name="input"></a>
 
 21cm parameters are set in input/input.txt.
 
@@ -21,9 +26,8 @@ h21cm.f90, h21cmreion.f90
 5) zspacing = linear or logarithmic redshift spacing
 6) dir = output directory
 
-<br>
 
-## Output
+# Output <a name="output"></a>
 
 output/21cm/21cm_global.txt is the global brightness temperature T_b(z).
 
@@ -39,3 +43,6 @@ output/21cm/power_z=xx.xx.txt is the power spectrum P(k).
 First line is a header. The two columns are:
 1) k = comoving wavenumber [h/Mpc]
 2) P = temperature power [(mK)^2(Mpc/h)^3]
+
+
+# References <a name="refs"></a>
