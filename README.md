@@ -25,7 +25,7 @@ Requirements:
 
 # Contact <a name="contact"></a>
 
-Please submit comments and questions to [issue](https://github.com/LSSTDESC/CLMM/issues).
+Please submit comments and questions to [issues](https://github.com/hytrac/amber/issues).
 
 The current lead developers are Hy Trac (hytrac@andrew.cmu.edu) and Nianyi Chen (nianyic@andrew.cmu.edu).
 
