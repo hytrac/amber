@@ -1,18 +1,24 @@
-# CMB
+# Table of Contents
+1) [About](about)
+2) [Source](source)
+3) [Input](input)
+4) [Output](output)
+5) [References](refs)
+ 
+
+# About <a name="about"></a>
 
 The CMB module computes tau(z), P_ee(k), P_qq(k), C_tau(l), and C_ksz(l). Note electron ionization fraction x_e = n_e/n_e,tot.
 
 We will add subroutines for making Healpix maps soon.
 
-<br>
 
-## Source
+# Source <a name="source"></a>
 
 cmb.f90, cmbreion.f90
 
-<br>
 
-## Input
+# Input <a name="input"></a>
 
 CMB parameters are set in input/input.txt.
 
@@ -25,9 +31,8 @@ CMB parameters are set in input/input.txt.
 7) lmax = maximum multipole
 8) dir = output directory
 
-<br>
 
-## Output
+# Output <a name="output"></a>
 
 output/cmb/tau.txt is the Thomson optical depth tau(z).
 
@@ -62,3 +67,12 @@ output/cmb/Cl_ksz_z=xx.xx.txt is the patchy KSZ angular power spectrum C_l.
 First line is a header. The two columns are:
 1) l = multipole
 2) C = angular power
+
+
+# References <a name="refs"></a>
+
+Chen, Trac, Mukherjee, Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2022, submitted to ApJ, [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
+
+Dvorkin & Smith, Reconstructing patchy reionization from the cosmic microwave background, 2009, [arXiv:0812.1566](https://arxiv.org/abs/0812.1566)
+
+Park et al, The Kinetic Sunyaev-Zel'dovich Effect as a Probe of the Physics of Cosmic Reionization: The Effect of Self-regulated Reionization, 2013, [arXiv:1301.3607](https://arxiv.org/abs/1301.3607)
