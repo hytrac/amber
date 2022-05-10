@@ -16,7 +16,7 @@ AMBER is written in modern Fortran and parallelized using OpenMP to run on a mul
 
 Content:
 - Source files in [src](https://github.com/hytrac/amber/tree/main/src)
-- Documentation READMEs in [doc](https://github.com/hytrac/amber/tree/main/doc)
+- Documentation READMEs in [docs](https://github.com/hytrac/amber/tree/main/docs)
 - Example inputs in [examples](https://github.com/hytrac/amber/tree/main/examples)
 
 Requirements:
