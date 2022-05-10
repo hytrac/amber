@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# SIMULATION
+# SIM
 16				# Number of core
 input				# Directory for inputs
 output				# Directory for outputs
@@ -20,7 +20,7 @@ output				# Directory for outputs
 linpowspec.txt			# Linear power spectrum file
 cosmo				# Directory
 #-------------------------------------------------------------------------------
-# REIONIZATION
+# REION
 make				# make, read, write
 8.00				# Midpoint redshift
 4.00				# Duration
@@ -71,4 +71,4 @@ yes                             # make, write
 1.0                             # z del
 lin                             # z spacing: lin, log
 21cm				# Directory
-#------------------------------------------------------------------------------\
+#------------------------------------------------------------------------------
