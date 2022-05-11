@@ -1,24 +1,16 @@
-# Table of Contents
-1) [About](about)
-2) [Source](source)
-3) [Input](input)
-4) [Output](output)
-5) [References](refs)
- 
-
-# About <a name="about"></a>
+# About
 
 The CMB module computes tau(z), P_ee(k), P_qq(k), C_tau(l), and C_ksz(l). Note electron ionization fraction x_e = n_e/n_e,tot.
 
 We will add subroutines for making Healpix maps soon.
 
 
-# Source <a name="source"></a>
+# Source
 
 cmb.f90, cmbreion.f90
 
 
-# Input <a name="input"></a>
+# Input
 
 CMB parameters are set in input/input.txt.
 
@@ -32,7 +24,7 @@ CMB parameters are set in input/input.txt.
 8) dir = output directory
 
 
-# Output <a name="output"></a>
+# Output
 
 output/cmb/tau.txt is the Thomson optical depth tau(z).
 
@@ -69,7 +61,7 @@ First line is a header. The two columns are:
 2) C = angular power
 
 
-# References <a name="refs"></a>
+# References
 
 Chen, Trac, Mukherjee, Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2022, submitted to ApJ, [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
 
