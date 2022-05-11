@@ -43,17 +43,16 @@ contains
     cmb%qz => mesh%fft3
 
 
-    ! CMB
-    if (cmb%make == 'make' .or. cmb%make =='write') then
-       ! Thomson optical depth
-       call cmb_tau
+    ! Thomson optical depth
+    call cmb_tau
 
-       ! Reionization
-       call cmb_reion
+    
+    ! Reionization
+    call cmb_reion
 
-       ! IO
-       if (cmb%make == 'write') call cmb_write
-    endif
+    
+    ! IO
+    if (cmb%make == 'write') call cmb_write
 
     
     time2 = time()

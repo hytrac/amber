@@ -97,14 +97,18 @@ program main
 
   ! CMB
   ! See cmb.f90, cmbreion.f90
-  call cmb_init
-  call cmb_make
+  if (cmb%make == 'make' .or. cmb%make == 'write') then
+     call cmb_init
+     call cmb_make
+  endif
 
 
   ! Hydrogen 21cm
   ! See h21cm.f90, h21cmreion.f90
-  call h21cm_init
-  call h21cm_make  
+  if (h21cm%make == 'make' .or. h21cm%make == 'write') then  
+     call h21cm_init
+     call h21cm_make
+  endif
 
 
   time2 = time()

@@ -40,18 +40,16 @@ contains
     h21cm%Tb => mesh%fft1
 
 
-    ! H21cm
-    if (h21cm%make == 'make' .or. h21cm%make =='write') then
-       ! Global 21cm
-       call h21cm_global
+    ! Global 21cm
+    call h21cm_global
 
-       ! Reionization
-       call h21cm_reion
+    
+    ! Reionization
+    call h21cm_reion
 
-       ! IO
-       if (h21cm%make == 'write') call h21cm_write
-    endif
-
+    
+    ! IO
+    if (h21cm%make == 'write') call h21cm_write
 
     
     time2 = time()
