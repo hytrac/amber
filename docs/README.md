@@ -1,15 +1,8 @@
-# Table of Contents
-1) [Source](source)
-2) [Compiling](compiling)
-3) [Simulation](sim)
-4) [Cosmology](cosmo)
-5) [Reionization](reion)
-6) [Gaussian Random Field](grf)
-7) [Lagrangian Perturbation Theory](lpt)
-8) [Excursion Set Formalism](esf)
-9) [Mesh/Part](meshpart)
+# About
 
-# Source <a name="source"></a>
+AMBER computes the reionization-redshift field assuming that hydrogen gas encountering higher radiation intensity are photoionized earlier. Redshift values are assigned while matching the abundance of ionized mass according to a given mass-weighted ionization fraction. Users can directly specify the reionization history through the redshift midpoint, duration, and asymmetry input parameters. The reionization process is further controlled through the minimum halo mass for galaxy formation and the radiation mean free path for radiative transfer. 
+
+# Source
 
 amber.f90 is the main source file.
 
@@ -27,14 +20,14 @@ To compile from scratch:  make clean; make
 
 To execute and save to log file:  ./amber.x < input/input.txt > output/log.txt
 
-# Simulation <a name="sim"></a>
+# Simulation
 
 Sim input parameters:
 1) ncore = number of cores (OpenMP threads)
 2) input = input directory
 3) output = output directory
 
-# Cosmology <a name="cosmo"></a>
+# Cosmology
 
 Cosmo input parameters:
 1) Lbox = comoving sim box length [Mpc/h]
@@ -79,7 +72,7 @@ First line is a header. The various columns are:
 11) b_zh = redshift-halo bias
 12) r_zh = redshift-halo cross correlation
 
-# Reionization <a name="reion"></a>
+# Reionization
 
 Reion input parameters:
 1) make = make, read, or write
@@ -97,7 +90,7 @@ Reion input parameters:
 
 output/reion/zre.dat is a single-precision binary file containing the zre field.
 
-# Gaussian Random Field (GRF) <a name="grf"></a>
+# Gaussian Random Field (GRF)
 
 GRF is used to generate initial conditions.
 
@@ -110,7 +103,7 @@ GRF input parameters:
 
 output/grf/grf.dat is a double-precision file containing the Fourier transform of the GRF.
 
-# Lagrangian Perturbation Theory (LPT) <a name="lpt"></a>
+# Lagrangian Perturbation Theory (LPT)
 
 LPT is used to generate particles.
 
@@ -129,7 +122,7 @@ First line is a header. The three columns are:
 2) Delta^2_lin = dimensionless matter power (linear theory)
 3) Delta^2_lpt = dimensionless matter power (lpt realization)
 
-# Excursion Set Formalism (ESF) <a name="esf"></a>
+# Excursion Set Formalism (ESF)
 
 ESF is used to model the halo mass density field.
 
@@ -145,7 +138,7 @@ output/esf/rhoh1.dat is a single-precision binary file containing the halo mass 
 
 output/esf/rhoh2.dat is a single-precision binary file containing the interaced halo mass density field.
 
-# Mesh/Part <a name="meshpart"></a>
+# Mesh/Part
 
 Mesh/part input parameters:
 1) make = make, read, or write
