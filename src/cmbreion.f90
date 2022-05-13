@@ -503,9 +503,11 @@ contains
          endif
 
          ! Bias and cc
-         if (powe(1,k) > 0) then
-            powe(5,k) = sqrt(powe(3,k)/powe(2,k))
-            powe(6,k) = powe(4,k)/sqrt(powe(2,k)*powe(3,k))
+         if (powe(2,k) > 0 .and. powe(3,k) > 0) then
+            powe(5,k)   = sqrt(powe(3,k)/powe(2,k))
+            powe(6,k)   = powe(4,k)/sqrt(powe(2,k)*powe(3,k))
+         else
+            powe(5:6,k) = 0
          endif
 
          ! Save
