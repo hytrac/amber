@@ -17,7 +17,6 @@ module h21cmreion_module
   use simulation_module, only : sim_calc 
 
 
-
   ! Default
   implicit none
   public
@@ -324,7 +323,7 @@ contains
          do j=1,h21cm%Nm1d
             do i=1,h21cm%Nm1d
                ! Matter
-               h21cm%rhom = mesh%rho2(i,j,k)
+               h21cm%rhom(i,j,k) = mesh%rho2(i,j,k)
                
                ! Neutral?
                if (cosmo%z > reion%zre(i,j,k)) then
