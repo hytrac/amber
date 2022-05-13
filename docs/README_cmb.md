@@ -39,10 +39,13 @@ output/cmb/power_z=xx.xx.txt are power spectra P(k).
 
 Note electron ionization fraction x_e = n_e/n_e,tot.
 
-First line is a header. The three columns are:
+First line is a header. The various columns are:
 1) k = comoving wavenumber [h/Mpc]
-2) Pee = electron power for tau [(Mpc/h)^3]
-3) Pqq = electron projected momentum power for KSZ [(Mpc/h)^3(km/s)^2]
+2) P_mm = matter power [(Mpc/h)^3]
+3) P_ee = electron power for tau [(Mpc/h)^3]
+4) P_qq = electron projected momentum power for KSZ [(Mpc/h)^3(km/s)^2]
+5) b_em = electron-matter bias
+6) r_em = electron-matter cross correlation
 
 <br>
 
@@ -65,6 +68,6 @@ First line is a header. The two columns are:
 
 Chen, Trac, Mukherjee, Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2022, submitted to ApJ, [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
 
-Dvorkin & Smith, Reconstructing patchy reionization from the cosmic microwave background, 2009, [arXiv:0812.1566](https://arxiv.org/abs/0812.1566)
+Dvorkin & Smith, Reconstructing Patchy Reionization from the Cosmic Microwave Background, 2009, [arXiv:0812.1566](https://arxiv.org/abs/0812.1566)
 
 Park et al, The Kinetic Sunyaev-Zel'dovich Effect as a Probe of the Physics of Cosmic Reionization: The Effect of Self-regulated Reionization, 2013, [arXiv:1301.3607](https://arxiv.org/abs/1301.3607)
