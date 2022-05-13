@@ -97,7 +97,7 @@ program main
 
   ! CMB
   ! See cmb.f90, cmbreion.f90
-  if (cmb%make == 'make' .or. cmb%make == 'write') then
+  if (input%cmb_make == 'make' .or. input%cmb_make == 'write') then
      call cmb_init
      call cmb_make
   endif
@@ -105,7 +105,7 @@ program main
 
   ! Hydrogen 21cm
   ! See h21cm.f90, h21cmreion.f90
-  if (h21cm%make == 'make' .or. h21cm%make == 'write') then  
+  if (input%h21cm_make == 'make' .or. input%h21cm_make == 'write') then  
      call h21cm_init
      call h21cm_make
   endif

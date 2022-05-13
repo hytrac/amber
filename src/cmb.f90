@@ -34,10 +34,10 @@ module cmb_module
      integer(8)    :: Nmesh
      ! Arrays
      integer(4)    , allocatable, dimension(:) :: l
-     real(8)       , allocatable, dimension(:) :: k,Pee,Pqq,Ctau,Cksz
+     real(8)       , allocatable, dimension(:) :: k,Pmm,Pee,Pqq,Ctau,Cksz
      type(ray_type), allocatable, dimension(:) :: ray
      ! Pointers
-     real(8), pointer, dimension(:,:,:) :: ne,qx,qy,qz
+     real(8), pointer, dimension(:,:,:) :: rho,ne,qx,qy,qz
   end type cmb_type
 
 

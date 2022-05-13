@@ -37,10 +37,11 @@ contains
 
 
     ! Pointers
-    cmb%ne => mesh%fft1
-    cmb%qx => mesh%fft1
-    cmb%qy => mesh%fft2
-    cmb%qz => mesh%fft3
+    cmb%rho => mesh%fft1
+    cmb%ne  => mesh%fft2
+    cmb%qx  => mesh%fft1
+    cmb%qy  => mesh%fft2
+    cmb%qz  => mesh%fft3
 
 
     ! Thomson optical depth
@@ -290,7 +291,8 @@ contains
       integer(4)    :: i,j,k,l,ip,kk,un
       integer(4)    :: imax,jmax,kmax
       real(8)       :: xe
-      real(8)       :: Ak,kx,kxh,ky,kyh,kz,kzh,kr,p,w
+      real(8)       :: Ak,kx,kxh,ky,kyh,kz,kzh,kr,w
+      real(8)       :: p,pmm,pee,pem
       character(80) :: fn
       real(8), dimension(2,3) :: q
       real(8), allocatable, dimension(:,:) :: powe,powq
@@ -306,7 +308,7 @@ contains
 
 
       ! Allocate
-      allocate(powe(2,cmb%Nm1d))
+      allocate(powe(6,cmb%Nm1d))
       allocate(powq(2,cmb%Nm1d))
       powe = 0
       powq = 0
@@ -331,6 +333,9 @@ contains
       do k=1,cmb%Nm1d
          do j=1,cmb%Nm1d
             do i=1,cmb%Nm1d
+               ! Matter
+               cmb%rho(i,j,k) = mesh%rho2(i,j,k)
+               
                ! Ionized?
                if (cosmo%z < reion%zre(i,j,k)) then
                   cmb%ne(i,j,k) = xe*mesh%rho2(i,j,k)
@@ -341,12 +346,13 @@ contains
          enddo
       enddo
 
-      call fft_3d(cmb%ne,'f')
+      call fft_3d(cmb%rho,'f')
+      call fft_3d(cmb%ne ,'f')
 
-      !$omp parallel do              & 
-      !$omp default(shared)          &
-      !$omp private(i,j,k,kk)        &
-      !$omp private(kx,ky,kz,kr,p,w) &
+      !$omp parallel do                        & 
+      !$omp default(shared)                    &
+      !$omp private(i,j,k,ip,kk)               &
+      !$omp private(kx,ky,kz,kr,pmm,pee,pem,w) &
       !$omp reduction(+:powe)
       do k=1,cmb%Nm1d
          if (k <= kmax) then
@@ -363,6 +369,7 @@ contains
             endif
 
             do i=1,imax,2
+               ip = i + 1
                kx = Ak*((i-1)/2)
                kr = sqrt(kx**2 + ky**2 + kz**2)
 
@@ -376,13 +383,19 @@ contains
                   endif
 
                   ! Power
-                  p = sum(cmb%ne(i:i+1,j,k)/mesh%Nmesh &
-                         *cmb%ne(i:i+1,j,k)/mesh%Nmesh)
+                  pmm = sum(cmb%rho(i:ip,j,k)/mesh%Nmesh &
+                           *cmb%rho(i:ip,j,k)/mesh%Nmesh)
+                  pee = sum(cmb%ne( i:ip,j,k)/mesh%Nmesh  &
+                           *cmb%ne( i:ip,j,k)/mesh%Nmesh)
+                  pem = sum(cmb%ne( i:ip,j,k)/mesh%Nmesh  &
+                           *cmb%rho(i:ip,j,k)/mesh%Nmesh)
 
                   ! Add to bin
                   kk         = nint(kr/Ak)
                   powe(1,kk) = powe(1,kk) + w
-                  powe(2,kk) = powe(2,kk) + w*p
+                  powe(2,kk) = powe(2,kk) + w*pmm
+                  powe(3,kk) = powe(3,kk) + w*pee
+                  powe(4,kk) = powe(4,kk) + w*pem
                endif
             enddo
          enddo
@@ -479,16 +492,29 @@ contains
 
 
       ! Power spectra
+      ! Pmm(k) [(Mpc/h)^3]
       ! Pee(k) [(Mpc/h)^3]
       ! Pqq(k) [(Mpc/h)^3(km/s)^2]
       do k=1,cmb%Nm1d
+         ! Divide by weights
          if (powe(1,k) > 0) then
-            cmb%Pee(k) = powe(2,k)/powe(1,k)*cosmo%Lbox**3
-            cmb%Pqq(k) = powq(2,k)/powq(1,k)*cosmo%Lbox**3
-         else
-            cmb%Pee(k) = 0
-            cmb%Pqq(k) = 0
+            powe(2:4,k) = powe(2:4,k)/powe(1,k)
          endif
+         if (powq(1,k) > 0) then
+            powq(2  ,k) = powq(2  ,k)/powq(1,k)
+         endif
+
+         ! Bias and cc
+         if (powe(1,k) > 0) then
+            powe(5,k) = sqrt(powe(3,k)/powe(2,k))
+            powe(6,k) = powe(4,k)/sqrt(powe(2,k)*powe(3,k))
+         endif
+
+         ! Save
+         cmb%Pmm(k)  = powe(2,k)  *cosmo%Lbox**3
+         cmb%Pee(k)  = powe(3,k)  *cosmo%Lbox**3
+         cmb%Pqq(k)  = powq(2,k)  *cosmo%Lbox**3
+         powe(2:4,k) = powe(2:4,k)*cosmo%Lbox**3
       enddo
 
       
@@ -498,10 +524,11 @@ contains
       write(*,*) 'Writing ',trim(fn)
       
       open(un,file=fn)
-      write(un,'(3a14)') 'k','P_ee','P_qq'
+      write(un,'(6a14)') 'k','P_mm','P_ee','P_qq','b_em','r_em'
       
       do k=1,cmb%Nm1d/2
-         write(un,'(3es14.6)') cmb%k(k),cmb%Pee(k),cmb%Pqq(k)
+         write(un,'(6es14.6)') cmb%k(k),cmb%Pmm(k),cmb%Pee(k),cmb%Pqq(k), &
+                               powe(5:6,k)
       enddo
       close(un)
       

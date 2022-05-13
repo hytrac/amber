@@ -189,10 +189,10 @@ contains
 
 
     ! Local variables
-    integer(4)     :: i,j,k,kk,un
+    integer(4)     :: i,j,k,ip,kk,un
     integer(4)     :: imax,jmax,kmax
     real(8)        :: Ak,kr,kx,ky,kz
-    real(8)        :: pmm,phh,pzz,pmh,pmz,phz
+    real(8)        :: pmm,phh,pzz,phm,pzm,pzh
     real(8)        :: havg,zavg,w
     character(100) :: fn
     real(8), allocatable, dimension(:,:) :: pow
@@ -294,9 +294,9 @@ contains
     ! Auto and cross power
     !$omp parallel do                        & 
     !$omp default(shared)                    &
-    !$omp private(i,j,k,kk)                  &
+    !$omp private(i,j,k,ip,kk)               &
     !$omp private(kx,ky,kz,kr)               &
-    !$omp private(pmm,phh,pzz,pmh,pmz,phz,w) &
+    !$omp private(pmm,phh,pzz,phm,pzm,pzh,w) &
     !$omp reduction(+:pow)
     do k=1,mesh%Nm1d
        if (k <= kmax) then
@@ -313,6 +313,7 @@ contains
           endif
 
           do i=1,imax,2
+             ip = ip + 1
              kx = Ak*((i-1)/2)
              kr = sqrt(kx**2 + ky**2 + kz**2)
 
@@ -326,18 +327,18 @@ contains
                 endif
 
                 ! Power
-                pmm = sum(mesh%fft1(i:i+1,j,k)/mesh%Nmesh &
-                         *mesh%fft1(i:i+1,j,k)/mesh%Nmesh)
-                phh = sum(mesh%fft2(i:i+1,j,k)/mesh%Nmesh &
-                         *mesh%fft2(i:i+1,j,k)/mesh%Nmesh)
-                pzz = sum(mesh%fft3(i:i+1,j,k)/mesh%Nmesh &
-                         *mesh%fft3(i:i+1,j,k)/mesh%Nmesh)                
-                pmh = sum(mesh%fft1(i:i+1,j,k)/mesh%Nmesh &
-                         *mesh%fft2(i:i+1,j,k)/mesh%Nmesh)
-                pmz = sum(mesh%fft1(i:i+1,j,k)/mesh%Nmesh &
-                         *mesh%fft3(i:i+1,j,k)/mesh%Nmesh)
-                phz = sum(mesh%fft2(i:i+1,j,k)/mesh%Nmesh &
-                         *mesh%fft3(i:i+1,j,k)/mesh%Nmesh)                
+                pmm = sum(mesh%fft1(i:ip,j,k)/mesh%Nmesh &
+                         *mesh%fft1(i:ip,j,k)/mesh%Nmesh)
+                phh = sum(mesh%fft2(i:ip,j,k)/mesh%Nmesh &
+                         *mesh%fft2(i:ip,j,k)/mesh%Nmesh)
+                pzz = sum(mesh%fft3(i:ip,j,k)/mesh%Nmesh &
+                         *mesh%fft3(i:ip,j,k)/mesh%Nmesh)                
+                phm = sum(mesh%fft1(i:ip,j,k)/mesh%Nmesh &
+                         *mesh%fft2(i:ip,j,k)/mesh%Nmesh)
+                pzm = sum(mesh%fft1(i:ip,j,k)/mesh%Nmesh &
+                         *mesh%fft3(i:ip,j,k)/mesh%Nmesh)
+                pzh = sum(mesh%fft2(i:ip,j,k)/mesh%Nmesh &
+                         *mesh%fft3(i:ip,j,k)/mesh%Nmesh)                
 
                 ! Add to bin
                 kk        = nint(kr/Ak)
@@ -345,9 +346,9 @@ contains
                 pow(2,kk) = pow(2,kk) + w*pmm
                 pow(3,kk) = pow(3,kk) + w*phh
                 pow(4,kk) = pow(4,kk) + w*pzz
-                pow(5,kk) = pow(5,kk) + w*pmh
-                pow(6,kk) = pow(6,kk) + w*pmz
-                pow(7,kk) = pow(7,kk) + w*phz
+                pow(5,kk) = pow(5,kk) + w*phm
+                pow(6,kk) = pow(6,kk) + w*pzm
+                pow(7,kk) = pow(7,kk) + w*pzh
              endif
           enddo
        enddo
