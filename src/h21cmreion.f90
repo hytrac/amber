@@ -327,11 +327,11 @@ contains
                
                ! Neutral?
                if (cosmo%z > reion%zre(i,j,k)) then
-                  h21cm%rhoh      =    mesh%rho2(i,j,k)
-                  h21cm%Tb(i,j,k) = Tb*mesh%rho2(i,j,k)
+                  h21cm%rhoh(i,j,k) =    mesh%rho2(i,j,k)
+                  h21cm%Tb(  i,j,k) = Tb*mesh%rho2(i,j,k)
                else
-                  h21cm%rhoh      = 0
-                  h21cm%Tb(i,j,k) = 0
+                  h21cm%rhoh(i,j,k) = 0
+                  h21cm%Tb(  i,j,k) = 0
                endif
             enddo
          enddo
@@ -408,9 +408,11 @@ contains
          endif
 
          ! Bias and cc
-         if (pow(1,k) > 0) then
-            pow(6,k) = sqrt(pow(3,k)/pow(2,k))
-            pow(7,k) = pow(5,k)/sqrt(pow(2,k)*pow(3,k))
+         if (pow(2,k) > 0 .and. pow(3,k) > 0) then
+            pow(6,k)   = sqrt(pow(3,k)/pow(2,k))
+            pow(7,k)   = pow(5,k)/sqrt(pow(2,k)*pow(3,k))
+         else
+            pow(6:7,k) = 0
          endif
  
          ! Save
