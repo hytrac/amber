@@ -91,6 +91,7 @@ contains
 
     ! Allocate
     allocate(cmb%k(  cmb%Nm1d))
+    allocate(cmb%Pmm(cmb%Nm1d))
     allocate(cmb%Pee(cmb%Nm1d))
     allocate(cmb%Pqq(cmb%Nm1d))
     allocate(cmb%l(   cmb%lmin:cmb%lmax))
@@ -99,6 +100,7 @@ contains
 
 
     ! Init
+    cmb%Pmm  = 0
     cmb%Pee  = 0
     cmb%Pqq  = 0
     cmb%Ctau = 0

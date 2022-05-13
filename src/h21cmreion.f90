@@ -8,7 +8,7 @@ module h21cmreion_module
   use constant_module
   use mkl_module
   use timing_module
-  use cosmo_module     , only : cosmo, dcom_of_z
+  use cosmo_module     , only : cosmo,dcom_of_z
   use cosmology_module , only : cosmo_calc
   use mesh_module      , only : mesh
   use meshmake_module  , only : mesh_density,mesh_velocity
@@ -37,7 +37,9 @@ contains
 
 
     ! Pointers
-    h21cm%Tb => mesh%fft1
+    h21cm%rhom => mesh%fft1
+    h21cm%rhoh => mesh%fft2
+    h21cm%Tb   => mesh%fft3
 
 
     ! Global 21cm
@@ -277,7 +279,8 @@ contains
       ! Local variables
       integer(4)    :: i,j,k,l,ip,kk,un
       integer(4)    :: imax,jmax,kmax
-      real(8)       :: Tb,Ak,kx,ky,kz,kr,p,w
+      real(8)       :: Tb,Ak,kx,ky,kz,kr
+      real(8)       :: pmm,phh,ptt,phm,w
       character(80) :: fn
       real(8), allocatable, dimension(:,:) :: pow
       
@@ -296,12 +299,12 @@ contains
 
 
       ! Allocate
-      allocate(pow(2,h21cm%Nm1d))
+      allocate(pow(7,h21cm%Nm1d))
       pow = 0
 
 
       ! 21cm
-      ! e.g. Madau et al (1997(
+      ! e.g. Madau et al (1997)
       Tb = 28*(cosmo%ob*cosmo%h**2/0.022)*sqrt(0.15/(cosmo%om*cosmo%h**2)) &
          * sqrt((1+cosmo%z)/10)
 
@@ -320,22 +323,29 @@ contains
       do k=1,h21cm%Nm1d
          do j=1,h21cm%Nm1d
             do i=1,h21cm%Nm1d
+               ! Matter
+               h21cm%rhom = mesh%rho2(i,j,k)
+               
                ! Neutral?
                if (cosmo%z > reion%zre(i,j,k)) then
+                  h21cm%rhoh      =    mesh%rho2(i,j,k)
                   h21cm%Tb(i,j,k) = Tb*mesh%rho2(i,j,k)
                else
+                  h21cm%rhoh      = 0
                   h21cm%Tb(i,j,k) = 0
                endif
             enddo
          enddo
       enddo
 
-      call fft_3d(h21cm%Tb,'f')
+      call fft_3d(h21cm%rhom,'f')
+      call fft_3d(h21cm%rhoh,'f')
+      call fft_3d(h21cm%Tb  ,'f')
 
-      !$omp parallel do              & 
-      !$omp default(shared)          &
-      !$omp private(i,j,k,kk)        &
-      !$omp private(kx,ky,kz,kr,p,w) &
+      !$omp parallel do                            & 
+      !$omp default(shared)                        &
+      !$omp private(i,j,k,ip,kk)                   &
+      !$omp private(kx,ky,kz,kr,pmm,phh,ptt,phm,w) &
       !$omp reduction(+:pow)
       do k=1,h21cm%Nm1d
          if (k <= kmax) then
@@ -352,6 +362,7 @@ contains
             endif
 
             do i=1,imax,2
+               ip = i + 1
                kx = Ak*((i-1)/2)
                kr = sqrt(kx**2 + ky**2 + kz**2)
 
@@ -365,13 +376,22 @@ contains
                   endif
 
                   ! Power
-                  p = sum(h21cm%Tb(i:i+1,j,k)/mesh%Nmesh &
-                         *h21cm%Tb(i:i+1,j,k)/mesh%Nmesh)
+                  pmm = sum(h21cm%rhom(i:ip,j,k)/mesh%Nmesh &
+                           *h21cm%rhom(i:ip,j,k)/mesh%Nmesh)
+                  phh = sum(h21cm%rhoh(i:ip,j,k)/mesh%Nmesh &
+                           *h21cm%rhoh(i:ip,j,k)/mesh%Nmesh)
+                  ptt = sum(h21cm%Tb(  i:ip,j,k)/mesh%Nmesh &
+                           *h21cm%Tb(  i:ip,j,k)/mesh%Nmesh)
+                  phm = sum(h21cm%rhoh(i:ip,j,k)/mesh%Nmesh &
+                           *h21cm%rhom(i:ip,j,k)/mesh%Nmesh)
 
                   ! Add to bin
                   kk        = nint(kr/Ak)
                   pow(1,kk) = pow(1,kk) + w
-                  pow(2,kk) = pow(2,kk) + w*p
+                  pow(2,kk) = pow(2,kk) + w*pmm
+                  pow(3,kk) = pow(3,kk) + w*phh
+                  pow(4,kk) = pow(4,kk) + w*ptt
+                  pow(5,kk) = pow(5,kk) + w*phm
                endif
             enddo
          enddo
@@ -381,12 +401,23 @@ contains
 
       ! Power spectra
       do k=1,h21cm%Nm1d
-         ! P(k)
+         ! Divide by weights
          if (pow(1,k) > 0) then
-            h21cm%Phh(k) = pow(2,k)/pow(1,k)*cosmo%Lbox**3
+            pow(2:5,k) = pow(2:5,k)/pow(1,k)
          else
-            h21cm%Phh(k) = 0
+            pow(2:5,k) = 0
          endif
+
+         ! Bias and cc
+         if (pow(1,k) > 0) then
+            pow(6,k) = sqrt(pow(3,k)/pow(2,k))
+            pow(7,k) = pow(5,k)/sqrt(pow(2,k)*pow(3,k))
+         endif
+ 
+         ! Save
+         h21cm%Pmm(k) = pow(2,k)*cosmo%Lbox**3
+         h21cm%Phh(k) = pow(3,k)*cosmo%Lbox**3
+         h21cm%PTT(k) = pow(4,k)*cosmo%Lbox**3
       enddo
 
 
@@ -396,10 +427,11 @@ contains
       write(*,*) 'Writing ',trim(fn)
       
       open(un,file=fn)
-      write(un,'(2a14)') 'k','P_TT'
+      write(un,'(6a14)') 'k','P_mm','P_hh','P_TT','b_hm','r_hm'
       
       do k=1,h21cm%Nm1d/2
-         write(un,'(2es14.6)') h21cm%k(k),h21cm%Phh(k)
+         write(un,'(6es14.6)') h21cm%k(k),h21cm%Pmm(k),h21cm%Phh(k), &
+              h21cm%PTT(k),pow(6:7,k)
       enddo
       
       close(un)
