@@ -32,9 +32,15 @@ First line is a header. The three columns are:
 
 output/21cm/power_z=xx.xx.txt is the power spectrum P(k).
 
-First line is a header. The two columns are:
+First line is a header. The various columns are:
 1) k = comoving wavenumber [h/Mpc]
-2) P = temperature power [(mK)^2(Mpc/h)^3]
+2) P_mm = matter power [(Mpc/h)^3]
+3) P_hh = HI power [(Mpc/h)^3]
+4) P_TT = temperature power [(mK)^2(Mpc/h)^3]
+5) b_hm = HI-matter bias
+6) r_hm = HI-matter cross correlation
 
 
 # References
+
+Madau et al., 21-cm Tomography of the Intergalactic Medium at High Redshift, 1997, [arXiv:9608010](https://arxiv.org/abs/astro-ph/9608010)
