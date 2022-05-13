@@ -33,10 +33,10 @@ module h21cm_module
      integer(4)    :: iz,Nz
      integer(8)    :: Nmesh
      ! Arrays
-     real(8)       , allocatable, dimension(:) :: k,Phh
+     real(8)       , allocatable, dimension(:) :: k,Pmm,Phh,PTT
      type(ray_type), allocatable, dimension(:) :: ray
      ! Pointers
-     real(8), pointer, dimension(:,:,:) :: Tb
+     real(8), pointer, dimension(:,:,:) :: rhom,rhoh,Tb
   end type h21_type
 
 
@@ -79,11 +79,15 @@ contains
 
     ! Allocate
     allocate(h21cm%k(  h21cm%Nm1d))
+    allocate(h21cm%Pmm(h21cm%Nm1d))
     allocate(h21cm%Phh(h21cm%Nm1d))
+    allocate(h21cm%PTT(h21cm%Nm1d))
 
 
     ! Init
+    h21cm%Pmm = 0
     h21cm%Phh = 0
+    h21cm%PTT = 0
 
     do k=1,h21cm%Nm1d
        h21cm%k(k) = 2*pi/cosmo%Lbox*k

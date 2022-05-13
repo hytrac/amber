@@ -8,14 +8,13 @@ module cmbreion_module
   use constant_module
   use mkl_module
   use timing_module
-  use cosmo_module       , only : cosmo,dcom_of_z
-  use cosmology_module   , only : cosmo_calc
-  use mesh_module        , only : mesh
-  use meshmake_module    , only : mesh_density,mesh_velocity
-  use reion_module       , only : reion
-  use reionization_module, only : reion_ionfrac
-  use sim_module         , only : sim,unit
-  use simulation_module  , only : sim_calc 
+  use cosmo_module     , only : cosmo,dcom_of_z
+  use cosmology_module , only : cosmo_calc
+  use mesh_module      , only : mesh
+  use meshmake_module  , only : mesh_density,mesh_velocity
+  use reion_module     , only : reion
+  use sim_module       , only : sim,unit
+  use simulation_module, only : sim_calc 
 
 
   ! Default
@@ -290,9 +289,8 @@ contains
       ! Local variables
       integer(4)    :: i,j,k,l,ip,kk,un
       integer(4)    :: imax,jmax,kmax
-      real(8)       :: xe
-      real(8)       :: Ak,kx,kxh,ky,kyh,kz,kzh,kr,w
-      real(8)       :: p,pmm,pee,pem
+      real(8)       :: Ak,kx,kxh,ky,kyh,kz,kzh,kr
+      real(8)       :: p,pmm,pee,pem,w,xe
       character(80) :: fn
       real(8), dimension(2,3) :: q
       real(8), allocatable, dimension(:,:) :: powe,powq
@@ -511,10 +509,9 @@ contains
          endif
 
          ! Save
-         cmb%Pmm(k)  = powe(2,k)  *cosmo%Lbox**3
-         cmb%Pee(k)  = powe(3,k)  *cosmo%Lbox**3
-         cmb%Pqq(k)  = powq(2,k)  *cosmo%Lbox**3
-         powe(2:4,k) = powe(2:4,k)*cosmo%Lbox**3
+         cmb%Pmm(k) = powe(2,k)*cosmo%Lbox**3
+         cmb%Pee(k) = powe(3,k)*cosmo%Lbox**3
+         cmb%Pqq(k) = powq(2,k)*cosmo%Lbox**3
       enddo
 
       

@@ -313,7 +313,7 @@ contains
           endif
 
           do i=1,imax,2
-             ip = ip + 1
+             ip = i + 1
              kx = Ak*((i-1)/2)
              kr = sqrt(kx**2 + ky**2 + kz**2)
 
