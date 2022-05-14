@@ -34,7 +34,8 @@ module input_module
      integer(4)    :: grf_seed
      character(80) :: grf_dir
      ! LPT
-     character(10) :: lpt_make,lpt_order,lpt_assign
+     character(10) :: lpt_make,lpt_assign
+     integer(4)    :: lpt_order
      character(80) :: lpt_dir
      ! ESF
      character(10) :: esf_make,esf_filter,esf_assign
@@ -171,7 +172,7 @@ contains
     read( *,*) input%lpt_dir
     write(*,*) 'LPT'
     write(*,*) 'Make           = ',trim(input%lpt_make)
-    write(*,*) 'Order          = ',trim(input%lpt_order)
+    write(*,*) 'Order          = ',input%lpt_order
     write(*,*) 'Assignment     = ',trim(input%lpt_assign)
     write(*,*) 'Dir            = ',trim(input%lpt_dir)
 

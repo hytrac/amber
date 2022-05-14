@@ -60,7 +60,7 @@ contains
 
        ! 1LPT or 2LPT
        call lpt_gradphi1
-       if (lpt%order == '2lpt') call lpt_gradphi2
+       if (lpt%order == 2) call lpt_gradphi2
 
        ! IO
        if (lpt%make == 'write') call lpt_write

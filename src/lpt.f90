@@ -19,8 +19,8 @@ module lpt_module
   ! Types
   type lpt_type
      ! Input
-     integer(4)    :: Nproc,Nm1d
-     character(10) :: make,order,assign
+     integer(4)    :: Nproc,Nm1d,order
+     character(10) :: make,assign
      character(80) :: dirin,dirout
      ! Variables
      integer(8)    :: Nmesh

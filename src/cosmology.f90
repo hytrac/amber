@@ -365,9 +365,8 @@ contains
           pow(2:7,k) = 0
        endif
 
-
        ! Bias and stochasticity
-       if (pow(1,k) > 0) then
+       if (pow(2,k) > 0 .and. pow(3,k) > 0) then
           ! matter-halo
           pow(8,k) = sqrt(pow(3,k)/pow(2,k))
           pow(9,k) = pow(5,k)/sqrt(pow(2,k)*pow(3,k))
@@ -378,9 +377,10 @@ contains
 
           ! halo-zre
           pow(12,k) = sqrt(pow(4,k)/pow(3,k))
-          pow(13,k) = pow(7,k)/sqrt(pow(3,k)*pow(4,k))          
+          pow(13,k) = pow(7,k)/sqrt(pow(3,k)*pow(4,k))
+       else
+          pow(8:13,k) = 0
        endif
-
 
        ! Save
        pow(  1,k) = Ak*k
