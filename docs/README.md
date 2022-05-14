@@ -149,4 +149,4 @@ Mesh/part input parameters:
 
 output/mesh/rho1.dat is a single-precision binary file containing the matter density field.
 
-output/mesh/rho2.dat is a single-precision binary file containing the interaced matter density field.
+output/mesh/rho2.dat is a single-precision binary file containing the interlaced matter density field.
