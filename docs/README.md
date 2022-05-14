@@ -136,7 +136,7 @@ ESF input parameters:
 
 output/esf/rhoh1.dat is a single-precision binary file containing the halo mass density field.
 
-output/esf/rhoh2.dat is a single-precision binary file containing the interaced halo mass density field.
+output/esf/rhoh2.dat is a single-precision binary file containing the interlaced halo mass density field.
 
 # Mesh/Part
 
