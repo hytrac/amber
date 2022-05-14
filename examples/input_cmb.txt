@@ -58,7 +58,7 @@ mesh				# Directory
 write				# make, write
 5.0				# z min
 20.0				# z max
-0.1				# z del
+0.2				# z del
 log				# z spacing: lin, log
 100				# l min
 10000				# l max
