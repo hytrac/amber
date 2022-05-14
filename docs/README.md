@@ -122,6 +122,13 @@ First line is a header. The three columns are:
 2) Delta^2_lin = dimensionless matter power (linear theory)
 3) Delta^2_lpt = dimensionless matter power (lpt realization)
 
+<br>
+
+output/lpt/delta1.dat is a double-precision binary file containing the Fourier Transform of the linear overdensity field.
+
+output/lpt/gradphi.dat is a single-precision binary file containing the gradients of the potentials.
+
+
 # Excursion Set Formalism (ESF)
 
 ESF is used to model the halo mass density field.
