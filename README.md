@@ -5,7 +5,7 @@ The Abundance Matching Box for the Epoch of Reionization (AMBER) is a semi-numer
 
 # Install
 
-AMBER is written in modern Fortran and parallelized using OpenMP to run on a multicore, shared-memory node. In addition to modules for simulating reionization, there are preliminary modules to compute CMB and 21cm observables.
+AMBER is written in modern Fortran and parallelized using OpenMP to run on a multicore, shared-memory node. In addition to modules for simulating reionization, there are preliminary modules for computing CMB and 21cm observables.
 
 Contents:
 - Source files in [src](https://github.com/hytrac/amber/tree/main/src)
