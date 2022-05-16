@@ -117,7 +117,7 @@ contains
     ! Read dimensionless power spectrum
     ! First line assumed to be header    
     un = 11
-    fn = trim(sim%dirin)//cosmo%file
+    fn = trim(cosmo%dirin)//cosmo%file
     write(*,*) 'Reading ',trim(fn)
     open(un,file=fn)
  
@@ -390,7 +390,7 @@ contains
 
     ! Write to file
     un = 11
-    fn = trim(cosmo%dir)//'power_'//trim(sim%zstr)//'.txt'
+    fn = trim(cosmo%dirout)//'power_'//trim(sim%zstr)//'.txt'
     write(*,*) 'Writing ',trim(fn)
     
     open(un,file=fn,recl=1000)

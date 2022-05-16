@@ -194,10 +194,10 @@ contains
     if (z > reion%zend) then
        ! EoR
        xe_of_z = xi_of_z(z) &
-               * (1 + cosmo%YHe/(4*cosmo%XH))/(1 + cosmo%YHe/(2*cosmo%XH))
+               * (cosmo%XH + cosmo%YHe/4)/(cosmo%XH + cosmo%YHe/2)
     else if (z > 3) then
        ! H ionized, He singly ionized
-       xe_of_z = (1 + cosmo%YHe/(4*cosmo%XH))/(1 + cosmo%YHe/(2*cosmo%XH))
+       xe_of_z = (cosmo%XH + cosmo%YHe/4)/(cosmo%XH + cosmo%YHe/2)
     else
        ! H ionized, He doubly ionized
        xe_of_z =  1

@@ -21,7 +21,7 @@ module cosmo_module
      real(8)       :: ob,om,ol,or
      real(8)       :: h,s8,ns,w
      real(8)       :: Tcmb0,XH,YHe
-     character(80) :: file
+     character(80) :: dirin,dirout,file
      ! Variables
      real(8) :: a,z,t
      real(8) :: H0,Hz,fb,fc
@@ -37,8 +37,6 @@ module cosmo_module
      ! Linear power spectrum
      integer(4) :: Nk
      real(8), allocatable, dimension(:,:) :: Plin
-     ! IO
-     character(80) :: dir
   end type cosmo_type
 
 
@@ -77,7 +75,8 @@ contains
     cosmo%XH     = input%cosmo_XH
     cosmo%YHe    = input%cosmo_YHe
     cosmo%file   = input%cosmo_file
-    cosmo%dir    = input%cosmo_dir
+    cosmo%dirout = input%cosmo_dir
+    cosmo%dirin  = input%sim_dirin
 
 
     ! Redshift, scalefactor

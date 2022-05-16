@@ -314,7 +314,7 @@ contains
 
       ! Electron ionization fraction, xe = ne/ne_tot
       ! H ionized, He singly ionized
-      xe = (1 + cosmo%YHe/(4*cosmo%XH))/(1 + cosmo%YHe/(2*cosmo%XH))
+      xe = (cosmo%XH + cosmo%YHe/4)/(cosmo%XH + cosmo%YHe/2)
 
 
       ! FFT

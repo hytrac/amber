@@ -299,9 +299,9 @@ contains
 
     ! Weibull function
     if (z > reion%awb) then
-       xi_of_z = dexp(-((z - reion%awb)/reion%bwb)**reion%cwb)
+       xi_of_z = exp(-((z - reion%awb)/reion%bwb)**reion%cwb)
     else
-       xi_of_z = 1D0
+       xi_of_z = 1d0
     endif
 
 
@@ -320,7 +320,7 @@ contains
 
 
     ! Inverted Weibull function
-    if (xi < 1D0) then
+    if (xi < 1d0) then
        z_of_xi = reion%awb + reion%bwb*(-dlog(xi))**(1./reion%cwb)
     else
        z_of_xi = reion%awb
