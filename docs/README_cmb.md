@@ -1,8 +1,6 @@
 # About
 
-The CMB module computes tau(z), P_ee(k), P_qq(k), C_tau(l), and C_ksz(l). Note electron ionization fraction x_e = n_e/n_e,tot.
-
-We will add subroutines for making Healpix maps soon.
+The CMB module computes tau(z), P_ee(k), P_qq(k), C_tau(l), and C_ksz(l). There are also subroutines to make Healpix maps of patchy tau and KSZ. Note electron ionization fraction x_e = n_e/n_e,tot.
 
 
 # Source
@@ -15,13 +13,15 @@ cmb.f90, cmbreion.f90
 CMB parameters are set in input/input.txt.
 
 1) make = make, write, or null
-2) zmin = minimum redshift
-3) zmax = maximum redshift
-4) zdel = redshift interval
-5) zspacing = linear or logarithm redshift spacing
-6) lmin = minimum multipole
-7) lmax = maximum multipole
-8) dir = output directory
+2) mapmake = make, write, or null
+3) zmin = minimum redshift
+4) zmax = maximum redshift
+5) zdel = redshift interval
+6) zspacing = linear or logarithm redshift spacing
+7) lmin = minimum multipole
+8) lmax = maximum multipole
+9) nside = Healpix nside
+10) dir = output directory
 
 
 # Output
@@ -49,7 +49,7 @@ First line is a header. The various columns are:
 
 <br>
 
-output/cmb/Cl_tau_z=xx.xx.txt is the patchy tau angular power spectrum C_l.
+output/cmb/cl_tau_z=xx.xx.txt is the patchy tau angular power spectrum C_l.
 
 First line is a header. The two columns are:
 1) l = multipole
@@ -57,11 +57,16 @@ First line is a header. The two columns are:
 
 <br>
 
-output/cmb/Cl_ksz_z=xx.xx.txt is the patchy KSZ angular power spectrum C_l.
+output/cmb/cl_ksz_z=xx.xx.txt is the patchy KSZ angular power spectrum C_l.
 
 First line is a header. The two columns are:
 1) l = multipole
 2) C = angular power
+
+<br>
+
+output/cmb/map_tau_nside=xxxx.fits is the patchy tau Healpix map.
+output/cmb/map_ksz_nside=xxxx.fits is the patchy KSZ Healpix map.
 
 
 # References
