@@ -15,6 +15,7 @@ Contents:
 Requirements:
 - [Intel ifort compiler](https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html#gs.zjewa9)
 - [Intel Math Kernel Library (MKL)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html) for FFT, random numbers, spline interpolation
+- [HEALPix](https://healpix.sourceforge.io) for maps
 
 # Contact
 
