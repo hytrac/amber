@@ -56,14 +56,14 @@ mesh				# Directory
 #-------------------------------------------------------------------------------
 # CMB
 write				# CMB: make, write
-no				# Map: make, write
+write				# Map: make, write
 5.0				# z min
 20.0				# z max
 0.2				# z del
 log				# z spacing: lin, log
 100				# l min
 10000				# l max
-0				# Nside
+4096				# Nside
 cmb				# Directory
 #-------------------------------------------------------------------------------
 # 21cm
