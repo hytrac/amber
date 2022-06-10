@@ -7,9 +7,19 @@ OPENMP = -qopenmp
 FLAGS  = $(FF) $(INTEL) $(OPENMP)
 #FLAGS  = $(FF) $(DEBUG) $(INTEL) $(OPENMP)
 
+# HEALPIX
+HEALPIX     = $(HOME)/local/Healpix_3.50
+HEALPIX_INC = -I$(HEALPIX)/include
+HEALPIX_LIB = -L$(HEALPIX)/lib -lhealpix
+
+# CFITSIO
+CFITSIO     = $(HOME)/local/cfitsio-3.39
+CFITSIO_INC = -I$(CFITSIO)/include
+CFITSIO_LIB = -L$(CFITSIO)/lib -lcfitsio
+
 # INC and LIB
-INC = 
-LIB = 
+INC = $(HEALPIX_INC) $(CFITSIO_INC)
+LIB = $(HEALPIX_LIB) $(CFITSIO_LIB)
 
 # Object files
 OBJ = constant.o timing.o mkl.o helper.o input.o \
