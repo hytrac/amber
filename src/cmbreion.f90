@@ -2,6 +2,11 @@ module cmbreion_module
   ! Intel
   use OMP_LIB
 
+  
+  ! Healpix
+  use alm_tools
+  use pix_tools
+
 
   ! Modules
   use cmb_module
@@ -10,6 +15,7 @@ module cmbreion_module
   use timing_module
   use cosmo_module     , only : cosmo,dcom_of_z
   use cosmology_module , only : cosmo_calc
+  use lpt_module       , only : x_lpt,v_lpt
   use mesh_module      , only : mesh
   use meshmake_module  , only : mesh_density,mesh_velocity
   use reion_module     , only : reion
@@ -52,7 +58,8 @@ contains
 
     
     ! IO
-    if (cmb%make == 'write') call cmb_write
+    if (cmb%make    == 'write') call cmb_write
+    if (cmb%mapmake == 'write') call cmb_mapwrite
 
     
     time2 = time()
@@ -170,7 +177,7 @@ contains
        call sim_calc
 
        
-       ! Make density and velocity fields at midpoint
+       ! Density and velocity fields at midpoint
        ! See meshmake.f90    
        call mesh_density
        call mesh_velocity
@@ -179,7 +186,19 @@ contains
        ! Patchy tau,ksz
        call cmb_powerspectrum
        call cmb_angularpowerspectrum
+
+
+       ! Healpix maps
+       if (cmb%mapmake == 'make' .or. cmb%mapmake == 'write') then
+          call cmb_mapmake
+       endif
     enddo
+
+
+    ! Healpix spectra
+    if (cmb%mapmake == 'make' .or. cmb%mapmake == 'write') then
+       call cmb_mapspectrum
+    endif
 
     
     time2 = time()
@@ -602,6 +621,273 @@ contains
 
     
   end subroutine cmb_reion
+
+
+  subroutine cmb_mapmake
+    ! Default
+    implicit none
+
+
+    ! Local variables
+    integer(4) :: iproc,k,kmin,kmax
+    integer(8) :: ip
+    real(8)    :: rbuf,rmax,kscale
+    real(8), dimension(2) :: p,pavg,psig,pmax,pmin
+  
+
+    ! Timing variables
+    integer(4) :: time1,time2
+    time1 = time()
+
+
+    ! Redshift shell
+    ! Buffer in Mpc/h for LPT particle displacement
+    rbuf = 10
+    rmax = cmb%ray(cmb%iz)%r(3) + rbuf
+    kmax = 1 + int(rmax*unit%box_to_mesh)
+    kmin = -kmax + 1
+
+
+    ! Maps
+    ! Loop over k latitudes
+    ! Skip to avoid thread collisions
+    !$omp parallel        &
+    !$omp default(shared) &
+    !$omp private(k)
+    !$omp do schedule(dynamic,1)
+    do k=kmin,kmax,2
+       call map_make(k)
+    enddo
+    !$omp end do
+    !$omp do schedule(dynamic,1)
+    do k=kmin+1,kmax,2
+       call map_make(k)
+    enddo
+    !$omp end do    
+    !$omp end parallel
+
+
+    ! Stats
+    pavg    = 0
+    psig    = 0
+    pmax    = 0
+    pmin(1) = huge(0.)
+    pmin(2) = 0
+    
+    !$omp parallel do            &
+    !$omp default(shared)        &
+    !$omp private(iproc,ip,p)    &
+    !$omp reduction(+:pavg,psig) &
+    !$omp reduction(max:pmax)    &
+    !$omp reduction(min:pmin)
+    do iproc=1,cmb%Nproc
+       do ip=cmb%proc(1,iproc),cmb%proc(2,iproc)
+          p(1) = cmb%tau(ip)
+          p(2) = cmb%ksz(ip)
+          pavg = pavg + p
+          psig = psig + p**2
+          pmax = max(pmax,p)
+          pmin = min(pmin,p)
+       enddo
+    enddo
+    !$omp end parallel do
+
+
+    ! Write to screen
+    pavg   = pavg/cmb%Npix
+    psig   = sqrt(psig/cmb%Npix - pavg**2)
+    kscale = cosmo%Tcmb0*1E6
+    write(*,*) 'tau : ',real((/pavg(1),psig(1),pmin(1),pmax(1)/))
+    write(*,*) 'ksz : ',real((/pavg(2),psig(2),pmin(2),pmax(2)/)*kscale)
+
+    
+    time2 = time()
+    write(*,'(2a)') timing(time1,time2),' : CMB map make'
+    return
+
+
+  contains
+
+
+    subroutine map_make(k1)
+      ! Default
+      implicit none
+
+
+      ! Subroutine arguments
+      integer(4) :: k1
+
+
+      ! Local variables
+      integer(4) :: i,j,k
+      integer(4) :: i1,i2,j1,j2,k2
+      integer(4) :: imin,imax,jmax
+      integer(8) :: ipix
+      real(8)    :: a,z,dcom,dcom1,dcom2,dang
+      real(8)    :: r,phi,theta,omega_str,area
+      real(8)    :: dtau,dksz,mue,tau,tau1,tau2,vlos
+      real(8)    :: rmin,rmax,rminsq,rmaxsq,xmin,xmax,ymax,ysq,zsq
+      real(8), dimension(3) :: x,x1,x2,v
+
+
+      ! Redshift shell
+      a     = cmb%ray(cmb%iz)%a(2)
+      z     = cmb%ray(cmb%iz)%z(2)
+      dcom1 = cmb%ray(cmb%iz)%r(1)
+      dcom  = cmb%ray(cmb%iz)%r(2)
+      dcom2 = cmb%ray(cmb%iz)%r(3)
+      tau1  = cmb%ray(cmb%iz)%tau(1)
+      tau2  = cmb%ray(cmb%iz)%tau(3)      
+      dang  = a*dcom
+
+
+      ! Pixel
+      ! area in proper cm^2
+      ! sig_str in Msolar/steradian
+      omega_str = 4*pi/cmb%Npix
+      area      = omega_str*(dang/cosmo%h*Mpc2cm)**2
+
+
+      ! tau, ksz
+      mue  = mH_cgs/(cosmo%XH + cosmo%YHe/4)
+      dtau =  sT_cgs*unit%mgas/mue/area
+      dksz = -sT_cgs/c_cgs*unit%vel*unit%mgas/mue/area
+
+
+      ! Block limits in part/mesh units
+      ! Buffer in Mpc/h for LPT particle displacement
+      rmin   = (dcom1 - rbuf)*unit%box_to_mesh
+      rmax   = (dcom2 + rbuf)*unit%box_to_mesh
+      rminsq = rmin**2
+      rmaxsq = rmax**2
+
+
+      ! Loop over block
+      k2    = 1 + mod(mod(k1,cmb%Nm1d) - 1 + cmb%Nm1d,cmb%Nm1d)
+      x1(3) = k1 - 0.5
+      x2(3) = floor(x1(3)/cmb%Nm1d)*cmb%Nm1d
+      zsq   = x1(3)**2
+      ymax  = sqrt(max(rmaxsq - zsq,0.))
+      jmax  = 1 + int(ymax)
+      
+      do j1=-jmax+1,jmax
+         j2    = 1 + mod(mod(j1,cmb%Nm1d) - 1 + cmb%Nm1d,cmb%Nm1d)
+         x1(2) = j1 - 0.5
+         x2(2) = floor(x1(2)/cmb%Nm1d)*cmb%Nm1d
+         ysq   = x1(2)**2
+         xmax  = sqrt(max(rmaxsq - (ysq + zsq),0.))
+         xmin  = sqrt(max(rminsq - (ysq + zsq),0.))
+         imax  = 1 + int(xmax)
+         imin  = 1 + int(xmin)
+         
+         do i1=-imax+1,imax
+            if (i1 <= -imin+1 .or. i1 >= imin) then
+               i2    = 1 + mod(mod(i1,cmb%Nm1d) - 1 + cmb%Nm1d,cmb%Nm1d)
+               x1(1) = i1 - 0.5
+               x2(1) = floor(x1(1)/cmb%Nm1d)*cmb%Nm1d
+               
+               ! Particle in part/mesh units
+               x = x_lpt(i2,j2,k2)
+               v = v_lpt(i2,j2,k2)
+               i = 1 + int(x(1))
+               j = 1 + int(x(2))
+               k = 1 + int(x(3))
+      
+               ! Lightcone coordinates in Mpc/h
+               x = (x + x2)*unit%mesh_to_box
+               r = sqrt(sum(x**2))
+
+               if (r > dcom1 .and. r < dcom2) then
+                  ! Pixel
+                  x = x/r
+                  call vec2ang(x,theta,phi)
+                  call ang2pix_ring(cmb%Nside,theta,phi,ipix)
+
+                  ! Ionized
+                  if (z < reion%zre(i,j,k)) then
+                     vlos = sum(v*x)
+                     tau  = tau1 + (tau2-tau1)*(r-dcom1)/(dcom2-dcom1)
+                     cmb%tau(ipix) = cmb%tau(ipix) + dtau
+                     cmb%ksz(ipix) = cmb%ksz(ipix) + dksz*vlos*exp(-tau)
+                  endif
+               endif
+            endif
+         enddo
+      enddo
+
+      return
+    end subroutine map_make
+
+
+  end subroutine cmb_mapmake
+
+
+  subroutine cmb_mapspectrum
+    ! Default
+    implicit none
+
+
+    ! Local variables
+    integer(4)     :: l,un
+    character(100) :: fn
+    real(8), dimension(2) :: zb
+    real(8), allocatable, dimension(:,:) :: rw,cl_tau,cl_ksz
+
+
+    ! Timing variables
+    integer(4) :: time1,time2
+    time1 = time()
+
+
+    ! Allocate
+    allocate(cl_tau(0:cmb%Nlmax,1:1))
+    allocate(cl_ksz(0:cmb%Nlmax,1:1))
+    allocate(rw(    2*cmb%Nside,1:1))
+
+
+    ! C_l
+    rw = 1D0
+    zb = (/-1D0,1D0/)
+
+    call map2alm(cmb%Nside,cmb%Nlmax,cmb%Nmmax,cmb%tau,cmb%alm,zb,rw)
+    call alm2cl( cmb%Nlmax,cmb%Nmmax,cmb%alm,cl_tau)
+
+    call map2alm(cmb%Nside,cmb%Nlmax,cmb%Nmmax,cmb%ksz,cmb%alm,zb,rw)
+    call alm2cl( cmb%Nlmax,cmb%Nmmax,cmb%alm,cl_ksz)
+
+
+    ! Write tau
+    un = 11
+    fn = trim(cmb%dirout)//'cl_tau_healpix.txt'
+    write(*,*) 'Writing ',trim(fn)
+    
+    open(11,file=fn)
+    write(un,'(a6,a14)') 'l','C_l'
+
+    do l=1,cmb%Nlmax
+       write(un,'(i6,es14.6)') l,cl_tau(l,1)
+    enddo
+    close(un)
+
+
+    ! Write ksz
+    un = 11
+    fn = trim(cmb%dirout)//'cl_ksz_healpix.txt'
+    write(*,*) 'Writing ',trim(fn)
+
+    open(11,file=fn)
+    write(un,'(a6,a14)') 'l','C_l'
+
+    do l=1,cmb%Nlmax
+       write(un,'(i6,es14.6)') l,cl_ksz(l,1)
+    enddo
+    close(un)
+    
+
+    time2 = time()
+    write(*,'(2a)') timing(time1,time2),' : CMB map spectrum'
+    return
+  end subroutine cmb_mapspectrum
 
 
 end module cmbreion_module

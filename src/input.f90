@@ -45,8 +45,8 @@ module input_module
      integer(4)    :: mesh_Nm1d
      character(80) :: mesh_dir
      ! CMB
-     character(10) :: cmb_make
-     integer(4)    :: cmb_lmin,cmb_lmax
+     character(10) :: cmb_make,cmb_mapmake
+     integer(4)    :: cmb_lmin,cmb_lmax,cmb_Nside
      real(8)       :: cmb_zmin,cmb_zmax,cmb_zdel
      character(10) :: cmb_zspacing
      character(80) :: cmb_dir
@@ -207,21 +207,25 @@ contains
     read( *,*)
     read( *,*)
     read( *,*) input%cmb_make
+    read( *,*) input%cmb_mapmake
     read( *,*) input%cmb_zmin
     read( *,*) input%cmb_zmax
     read( *,*) input%cmb_zdel
     read( *,*) input%cmb_zspacing
     read( *,*) input%cmb_lmin
     read( *,*) input%cmb_lmax
+    read( *,*) input%cmb_Nside
     read( *,*) input%cmb_dir
     write(*,*) 'CMB'
     write(*,*) 'Make           = ',trim(input%cmb_make)
+    write(*,*) 'Map make       = ',trim(input%cmb_mapmake)
     write(*,*) 'z min          = ',real(input%cmb_zmin)
     write(*,*) 'z max          = ',real(input%cmb_zmax)
     write(*,*) 'z del          = ',real(input%cmb_zdel)
     write(*,*) 'z spacing      = ',trim(input%cmb_zspacing)
     write(*,*) 'l min          = ',input%cmb_lmin
     write(*,*) 'l max          = ',input%cmb_lmax
+    write(*,*) 'Nside          = ',input%cmb_Nside
     write(*,*) 'Dir            = ',trim(input%cmb_dir)
 
 

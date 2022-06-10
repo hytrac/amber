@@ -140,7 +140,7 @@ contains
       do m=indx(1,2),indx(2,2)
       do l=indx(1,1),indx(2,1)
          ! Particle
-         x = mod(x_lpt(l,m,n) - 0.5 + lm1d,lm1d)
+         x = mod(x_lpt(l,m,n),lm1d)
 
          ! Indices and weights
          i( 0)  = 1 + int(x(1))
@@ -659,7 +659,7 @@ contains
       do m=indx(1,2),indx(2,2)
       do l=indx(1,1),indx(2,1)
          ! Particle
-         x  = mod(x_lpt(l,m,n) - 0.5 + lm1d,lm1d)
+         x  = mod(x_lpt(l,m,n),lm1d)
          v  = v_lpt(l,m,n)*unit%vel/1E5
          mv = mass*v
 
