@@ -66,6 +66,7 @@ First line is a header. The two columns are:
 <br>
 
 output/cmb/map_tau_nside=xxxx.fits is the patchy tau Healpix map.
+
 output/cmb/map_ksz_nside=xxxx.fits is the patchy KSZ Healpix map.
 
 
