@@ -280,12 +280,9 @@ contains
     enddo
     !$omp end parallel do
 
-    fn = trim(cmb%dirout)//'map_tau_nside='//trim(Nside_str)//'.fits'
+    fn = trim(cmb%dirout)//'map_tau_nside='//trim(Nside_str) &
+         //'_'//trim(sim%fstr)//'.fits'
     header = ''
-
-    call write_minimal_header(header,'MAP',nside=cmb%Nside,ordering='RING', &
-         coordsys='C',units='')
-    call write_bintab(cmb%fits,cmb%Npix,1,header,L_header,'!'//trim(fn))
 
     
     ! KSZ map
@@ -298,7 +295,8 @@ contains
     enddo
     !$omp end parallel do
 
-    fn = trim(cmb%dirout)//'map_ksz_nside='//trim(Nside_str)//'.fits'
+    fn = trim(cmb%dirout)//'map_ksz_nside='//trim(Nside_str) &
+         //'_'//trim(sim%fstr)//'.fits'
     header = ''
 
     call write_minimal_header(header,'MAP',nside=cmb%Nside,ordering='RING', &
