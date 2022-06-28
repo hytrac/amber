@@ -84,14 +84,13 @@ contains
 
 
     ! Local variables
-    integer(4)    :: i,j,k,kk,Nk,un
-    integer(4)    :: imax,jmax,kmax
-    real(8)       :: Ak,kr,kx,ky,kz,dk
-    real(8)       :: p1,p2,w
-    character(80) :: fn
-    type(df_task) :: task
-    real(8), dimension(1) :: x
-    real(8), allocatable, dimension(:)   :: klin,plin
+    integer(4)        :: i,j,k,kk,Nk,un
+    integer(4)        :: imax,jmax,kmax
+    real(8)           :: Ak,kr,kx,ky,kz,dk
+    real(8)           :: p1,p2,w
+    character(80)     :: fn
+    type(spline_type) :: spline
+    real(8), dimension(1) :: x,y
     real(8), allocatable, dimension(:,:) :: pow
 
 
@@ -113,18 +112,18 @@ contains
 
 
     ! Spline
-    allocate(klin(cosmo%Nk))
-    allocate(plin(cosmo%Nk))
-    klin = cosmo%Plin(1,:)
-    plin = cosmo%Plin(3,:)
-    call spline_construct(task,klin,plin)
+    allocate(spline%x(cosmo%Nk))
+    allocate(spline%y(cosmo%Nk))
+    spline%x = cosmo%Plin(1,:)
+    spline%y = cosmo%Plin(3,:)
+    call spline_construct(spline)
 
 
     ! Fourier modes delta(k)
-    !$omp parallel do                    &
-    !$omp default(shared)                &
-    !$omp private(i,j,k,kk)              &
-    !$omp private(kr,kx,ky,kz,p1,p2,w,x) &
+    !$omp parallel do                      &
+    !$omp default(shared)                  &
+    !$omp private(i,j,k,kk)                &
+    !$omp private(kr,kx,ky,kz,p1,p2,w,x,y) &
     !$omp reduction(+:pow)
     do k=1,lpt%Nm1d
        if (k <= kmax) then
@@ -154,8 +153,8 @@ contains
 
                 ! Interpolate
                 x  = kr*lpt%Nm1d/cosmo%Lbox
-                x  = spline_interp(task,x)
-                p1 = (2*pi**2/kr**3)*x(1)
+                y  = spline_interp(spline,x)
+                p1 = (2*pi**2/kr**3)*y(1)
 
                 ! Fourier mode
                 lpt%delta1(i:i+1,j,k) = sqrt(p1)*grf%grf(i:i+1,j,k)

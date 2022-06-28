@@ -23,6 +23,16 @@ module mkl_module
   public
 
 
+  ! Types
+  type spline_type
+     ! Variables
+     type(df_task) :: task
+     integer(4)    :: nx,ny,nc     
+     ! Arrays
+     real(8), allocatable, dimension(:) :: x,y,coeff
+  end type spline_type
+
+
 contains
 
 
@@ -149,8 +159,8 @@ contains
     
     ! Init task
     nx     = size(x)
-    xhint  = DF_NO_HINT
     ny     = 1
+    xhint  = DF_NO_HINT
     yhint  = DF_NO_HINT
     status = dfdnewtask1d(task,nx,x,xhint,ny,y,yhint)
     
@@ -175,7 +185,7 @@ contains
     type   = DF_INTERP
     method = DF_METHOD_PP
     nsite  = size(xs)
-    shint  = DF_NO_HINT
+    shint  = DF_SORTED_DATA
     rhint  = DF_NO_HINT
     status = dfdinterpolate1d(task, &
          type,method,nsite,xs,shint,r=ys,rhint=rhint)
@@ -191,22 +201,20 @@ contains
   end subroutine spline_cubic
 
 
-  subroutine spline_construct(task,x,y)
+  subroutine spline_construct(spline)
     ! Default
     implicit none
 
 
     ! Subroutine arguments
-    type(df_task)         :: task
-    real(8), dimension(:) :: x,y
+    type(spline_type) :: spline
 
 
     ! Local variables
     integer(4) :: status
-    integer(4) :: nx,xhint,ny,yhint
+    integer(4) :: xhint,yhint
     integer(4) :: sorder,stype,bctype,scoeffhint
     integer(4) :: sformat,method
-    real(8), allocatable, dimension(:) :: scoeff
     
 
     ! Timing variables
@@ -215,11 +223,12 @@ contains
 
     
     ! Init task
-    nx     = size(x)
-    xhint  = DF_NO_HINT
-    ny     = 1
-    yhint  = DF_NO_HINT
-    status = dfdnewtask1d(task,nx,x,xhint,ny,y,yhint)
+    spline%nx = size(spline%x)
+    spline%ny = 1
+    xhint     = DF_NO_HINT
+    yhint     = DF_NO_HINT
+    status    = dfdnewtask1d(spline%task, &
+         spline%nx,spline%x,xhint,spline%ny,spline%y,yhint)
     
     
     ! Edit task
@@ -227,30 +236,33 @@ contains
     stype      = DF_PP_NATURAL
     bctype     = DF_BC_FREE_END
     scoeffhint = DF_NO_HINT
-    allocate(scoeff(sorder*ny*(nx-1)))
-    status     = dfdeditppspline1d(task, &
-         sorder,stype,bctype,scoeff=scoeff,scoeffhint=scoeffhint)
+    spline%nc  = sorder*spline%ny*(spline%nx-1)
+    allocate(spline%coeff(spline%nc))
+    
+    status = dfdeditppspline1d(spline%task, &
+         sorder,stype,bctype,scoeff=spline%coeff,scoeffhint=scoeffhint)
  
 
     ! Construct task
     sformat = DF_PP_SPLINE
     method  = DF_METHOD_STD
-    status  = dfdconstruct1d(task,sformat,method)
+    status  = dfdconstruct1d(spline%task,sformat,method)
 
     
     time2 = time()
+    !write(*,'(2a)') timing(time1,time2),' : MKL spline construct'
     !write(*,'(2a)') timing(time1,time2),' : MKL spline construct'
     return
   end subroutine spline_construct
 
 
-  function spline_interp(task,xs)
+  function spline_interp(spline,xs)
     ! Default
     implicit none
 
 
     ! Function arguments
-    type(df_task) :: task
+    type(spline_type)     :: spline
     real(8), dimension(:) :: xs
     real(8), allocatable, dimension(:) :: spline_interp
 
@@ -269,7 +281,7 @@ contains
     method = DF_METHOD_PP
     shint  = DF_NO_HINT
     rhint  = DF_NO_HINT
-    status = dfdinterpolate1d(task, &
+    status = dfdinterpolate1d(spline%task, &
          type,method,nsite,xs,shint,r=spline_interp,rhint=rhint)
 
 
