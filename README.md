@@ -28,4 +28,4 @@ The current lead developers are Hy Trac (hytrac@andrew.cmu.edu) and Nianyi Chen 
 
 H. Trac, N. Chen, I. Holst, M.A. Alvarez, R. Cen, AMBER: A Semi-numerical Abundance Matching Box for the Epoch of Reionization, 2022, [ApJ, 927, 186](https://iopscience.iop.org/article/10.3847/1538-4357/ac5116), [arXiv:2109.10375](https://arxiv.org/abs/2109.10375)
 
-N. Chen, H. Trac, S. Mukherjee, R. Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2022, submitted to ApJ, [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
+N. Chen, H. Trac, S. Mukherjee, R. Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2023, [ApJ, 943, 138](https://iopscience.iop.org/article/10.3847/1538-4357/ac8481), [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
