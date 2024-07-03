@@ -15,7 +15,7 @@ output				# Directory for outputs
 0.96                    	# n_s
 -1                      	# w
 2.725                   	# T_cmb
-1090                      # recombination redshift
+1090                      	# recombination redshift
 0.76                    	# X hydrogen fraction
 0.24                    	# Y Helium fraction
 linpowspec.txt			# Linear power spectrum file
@@ -68,7 +68,7 @@ log				# z spacing: lin, log
 cmb				# Directory
 #-------------------------------------------------------------------------------
 # 21cm
-write                             # make, write
+write                           # make, write
 5.5                             # z min
 15.5				# z max
 1.0                             # z del
