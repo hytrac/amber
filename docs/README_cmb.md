@@ -84,7 +84,7 @@ output/cmb/map_ksz_nside=xxxx.fits is the patchy KSZ Healpix map.
 
 Chen, Trac, Mukherjee, Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2023, [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
 
-Lewis & Challinor, Weak Gravitational Lensing of the CMB, 2006, [arXiv:astro-ph/0601594
+Lewis & Challinor, Weak Gravitational Lensing of the CMB, 2006, [arXiv:0601594
 ](https://arxiv.org/abs/astro-ph/0601594)
 
 Dvorkin & Smith, Reconstructing Patchy Reionization from the Cosmic Microwave Background, 2009, [arXiv:0812.1566](https://arxiv.org/abs/0812.1566)
