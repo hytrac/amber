@@ -40,10 +40,11 @@ Cosmo input parameters:
 8) ns = spectral index n_s
 9) w = dark energy equation of state
 20) Tcmb = CMB temperature [uK]
-21) XH = hydrogen mass fraction
-22) YHe = helium mass frction
-23) linpowspec filename = linear power spectrum file
-24) dir = output directory
+21) zrec = recombination redshift
+22) XH = hydrogen mass fraction
+23) YHe = helium mass frction
+24) linpowspec filename = linear power spectrum file
+25) dir = output directory
 
 
 <br>
