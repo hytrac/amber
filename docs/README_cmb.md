@@ -1,6 +1,6 @@
 # About
 
-The CMB module computes tau(z), P_ee(k), P_qq(k), C_tau(l), and C_ksz(l). There are also subroutines to make Healpix maps of patchy tau and KSZ. Note electron ionization fraction x_e = n_e/n_e,tot.
+The CMB module computes tau(z), P_mm(k), P_ee(k), P_qq(k), C_kappa(l), C_tau(l), and C_ksz(l). There are also subroutines to make Healpix maps of CMB lensing convergence, patchy tau, and patchy KSZ. Note electron ionization fraction x_e = n_e/n_e,tot.
 
 
 # Source
@@ -49,6 +49,14 @@ First line is a header. The various columns are:
 
 <br>
 
+output/cmb/cl_kappa_z=xx.xx.txt is the CMB lensing convergence angular power spectrum C_l.
+
+First line is a header. The two columns are:
+1) l = multipole
+2) C = angular power
+
+<br>
+
 output/cmb/cl_tau_z=xx.xx.txt is the patchy tau angular power spectrum C_l.
 
 First line is a header. The two columns are:
@@ -65,6 +73,8 @@ First line is a header. The two columns are:
 
 <br>
 
+output/cmb/map_kappa_nside=xxxx.fits is the CMB lensing convergence Healpix map.
+
 output/cmb/map_tau_nside=xxxx.fits is the patchy tau Healpix map.
 
 output/cmb/map_ksz_nside=xxxx.fits is the patchy KSZ Healpix map.
@@ -72,7 +82,10 @@ output/cmb/map_ksz_nside=xxxx.fits is the patchy KSZ Healpix map.
 
 # References
 
-Chen, Trac, Mukherjee, Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2022, submitted to ApJ, [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
+Chen, Trac, Mukherjee, Cen, Patchy Kinetic Sunyaev-Zel'dovich Effect with Controlled Reionization History and Morphology, 2023, [arXiv:2203.04337](https://arxiv.org/abs/2203.04337)
+
+Lewis & Challinor, Weak Gravitational Lensing of the CMB, 2006, [arXiv:astro-ph/0601594
+](https://arxiv.org/abs/astro-ph/0601594)
 
 Dvorkin & Smith, Reconstructing Patchy Reionization from the Cosmic Microwave Background, 2009, [arXiv:0812.1566](https://arxiv.org/abs/0812.1566)
 
