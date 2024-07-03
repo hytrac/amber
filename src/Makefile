@@ -8,12 +8,12 @@ FLAGS  = $(FF) $(INTEL) $(OPENMP)
 #FLAGS  = $(FF) $(DEBUG) $(INTEL) $(OPENMP)
 
 # HEALPIX
-HEALPIX     = $(HOME)/local/Healpix_3.50
+HEALPIX     = $(HOME)/local/Healpix_3.82
 HEALPIX_INC = -I$(HEALPIX)/include
-HEALPIX_LIB = -L$(HEALPIX)/lib -lhealpix
+HEALPIX_LIB = -L$(HEALPIX)/lib -lhealpix -lsharp
 
 # CFITSIO
-CFITSIO     = $(HOME)/local/cfitsio-3.39
+CFITSIO     = $(HOME)/local/cfitsio-4.4.0
 CFITSIO_INC = -I$(CFITSIO)/include
 CFITSIO_LIB = -L$(CFITSIO)/lib -lcfitsio
 

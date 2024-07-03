@@ -21,7 +21,7 @@ module input_module
      real(8)       :: cosmo_Lbox
      real(8)       :: cosmo_ob,cosmo_om,cosmo_ol,cosmo_or
      real(8)       :: cosmo_h,cosmo_s8,cosmo_ns,cosmo_w
-     real(8)       :: cosmo_Tcmb0,cosmo_XH,cosmo_YHe
+     real(8)       :: cosmo_Tcmb0,cosmo_zrec,cosmo_XH,cosmo_YHe
      character(80) :: cosmo_file,cosmo_dir
      ! Reionization
      character(10) :: reion_make
@@ -104,6 +104,7 @@ contains
     read( *,*) input%cosmo_ns
     read( *,*) input%cosmo_w
     read( *,*) input%cosmo_Tcmb0
+    read( *,*) input%cosmo_zrec
     read( *,*) input%cosmo_XH
     read( *,*) input%cosmo_YHe
     read( *,*) input%cosmo_file
@@ -119,6 +120,7 @@ contains
     write(*,*) 'n_s            = ',real(input%cosmo_ns)
     write(*,*) 'w_de           = ',real(input%cosmo_w)
     write(*,*) 'T_cmb          = ',real(input%cosmo_Tcmb0)
+    write(*,*) 'z_rec          = ',real(input%cosmo_zrec)
     write(*,*) 'X_hydrogen     = ',real(input%cosmo_XH)
     write(*,*) 'Y_helium       = ',real(input%cosmo_YHe)
     write(*,*) 'Plin file      = ',trim(input%cosmo_file)

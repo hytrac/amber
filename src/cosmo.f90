@@ -20,11 +20,11 @@ module cosmo_module
      real(8)       :: Lbox
      real(8)       :: ob,om,ol,or
      real(8)       :: h,s8,ns,w
-     real(8)       :: Tcmb0,XH,YHe
+     real(8)       :: Tcmb0,zrec,XH,YHe
      character(80) :: dirin,dirout,file
      ! Variables
      real(8) :: a,z,t
-     real(8) :: H0,Hz,fb,fc
+     real(8) :: drec,H0,Hz,fb,fc
      ! Densities
      real(8) :: rhocrit,rhocrit0
      real(8) :: rhob,rhob0,rhodm,rhodm0,rhom,rhom0
@@ -72,6 +72,7 @@ contains
     cosmo%ns     = input%cosmo_ns
     cosmo%w      = input%cosmo_w
     cosmo%Tcmb0  = input%cosmo_Tcmb0
+    cosmo%zrec   = input%cosmo_zrec
     cosmo%XH     = input%cosmo_XH
     cosmo%YHe    = input%cosmo_YHe
     cosmo%file   = input%cosmo_file
@@ -87,6 +88,11 @@ contains
     ! Growth factors
     gf = growthfactors_of_z(0D0)
     cosmo%delta0 = gf(1)
+
+
+    ! CMB
+    ! comoving distance to zrec [Mpc/h]
+    cosmo%drec = dcom_of_z(0D0,0D0,cosmo%zrec)
 
     
     time2 = time()
@@ -201,7 +207,7 @@ contains
     a1 = 1/(1 + z1)
     a2 = 1/(1 + z2)
     N  = 2*(ceiling(abs(a2-a1)/1E-6/2,kind=8))
-    da = (a2 - a1)/N
+    da = (a2 - a1)/max(N,1)
 
  
     ! Integrate using Simpson's rule
@@ -260,7 +266,7 @@ contains
     ! Set |dr| about 1E-3 Mpc/h
     ! If d2 > d1, then dr > 0 and dz > 0
     N  = ceiling(abs(d2 - d1)/1E-3,kind=8)
-    dr = (d2 - d1)/N
+    dr = (d2 - d1)/max(N,1)
 
     
     ! 4th-order Runge Kutta

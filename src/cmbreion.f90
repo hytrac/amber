@@ -15,7 +15,7 @@ module cmbreion_module
   use timing_module
   use cosmo_module     , only : cosmo,dcom_of_z
   use cosmology_module , only : cosmo_calc
-  use lpt_module       , only : x_lpt,v_lpt
+  use lpt_module       , only : dx_lpt,x_lpt,xnp_lpt,v_lpt
   use mesh_module      , only : mesh
   use meshmake_module  , only : mesh_density,mesh_velocity
   use reion_module     , only : reion
@@ -104,7 +104,7 @@ contains
     
     open(un,file=fn)
     write(un,'(a5,2a14)') 'z','x_e','tau'
-    write(un,'(f5.2,2es14.6)') z,xe,tau
+    write(un,'(f5.2,2es14.6)') real((/z,xe,tau/))
     
     do iz=1,Nz
        ! Redshift
@@ -119,7 +119,7 @@ contains
        tau = tau_of_z(tau,z1,z2)
 
        ! IO
-       write(un,'(f5.2,2es14.6)') z2,xe,tau
+       write(un,'(f5.2,2es14.6)') real((/z2,xe,tau/))
     enddo
     
     close(un)
@@ -221,6 +221,7 @@ contains
       real(8)    :: r,r1,r2
       real(8)    :: x,x1,x2
       real(8)    :: tau,tau1,tau2
+      real(8)    :: wk,wk1,wk2
 
 
       ! Timing variables
@@ -249,7 +250,8 @@ contains
       r1   = dcom_of_z(0D0,0D0,z1) 
       x1   = xe_of_z(z1)
       tau1 = tau_of_z(0D0,0D0,z1)
-
+      wk1  = wkap_of_z(z1)
+      
 
       ! Loop over redshifts
       do iz=1,cmb%Nz
@@ -278,12 +280,17 @@ contains
          tau  = tau_of_z(tau1,z1,z )
          tau2 = tau_of_z(tau ,z ,z2)
 
+         ! Lensing kernel
+         wk  = wkap_of_z(z )
+         wk2 = wkap_of_z(z2)
+
          ! Save
          cmb%ray(iz)%z   = (/z1,z,z2/)
          cmb%ray(iz)%a   = (/a1,a,a2/)
          cmb%ray(iz)%r   = (/r1,r,r2/)
          cmb%ray(iz)%xe  = (/x1,x,x2/)
          cmb%ray(iz)%tau = (/tau1,tau,tau2/)
+         cmb%ray(iz)%wk  = (/wk1,wk,wk2/)
 
          ! Next
          z1   = z2
@@ -291,6 +298,7 @@ contains
          r1   = r2
          x1   = x2
          tau1 = tau2
+         wk1  = wk2
       enddo
 
 
@@ -563,8 +571,8 @@ contains
 
 
       ! Local variables
-      real(8) :: a,r,dr,tau
-      real(8) :: Atau,Aksz
+      real(8) :: a,r,dr,tau,wk
+      real(8) :: Aksz,Atau
       real(8), allocatable, dimension(:) :: k,p
 
 
@@ -583,13 +591,27 @@ contains
       r   = cmb%ray(cmb%iz)%r(2)
       dr  = cmb%ray(cmb%iz)%r(3) - cmb%ray(cmb%iz)%r(1)
       tau = cmb%ray(cmb%iz)%tau(2)
+      wk  = cmb%ray(cmb%iz)%wk(2)
+
+
+      ! Limber approximation
+      k = cmb%l/r
+
+
+      ! CMB lensing kappa
+      ! e.g. Lewis & Challinor (2006)
+      
+      ! Limber approximation Pmm(k = l/r)
+      call spline_cubic(cmb%k,cmb%Pmm,k,p)
+
+      ! Integrate/sum
+      cmb%Ckap = cmb%Ckap + p*(wk/r)**2*dr      
 
 
       ! Patchy tau
       ! e.g. Dvorkin & Smith (2009)
       
       ! Limber approximation Pee(k = l/r)
-      k = cmb%l/r
       call spline_cubic(cmb%k,cmb%Pee,k,p)
 
       ! (Mpc/h)^2: (Mpc/h)^3 from Pee, (Mpc/h)^-1 from dr/r^2
@@ -603,7 +625,6 @@ contains
       ! e.g. Park et al (2013)
 
       ! Limber approximation Pqq(k = l/r)
-      k = cmb%l/r
       call spline_cubic(cmb%k,cmb%Pqq,k,p)
 
       ! (Mpc/h)^2: (Mpc/h)^3 from Pqq, (Mpc/h)^-1 from dr/r^2
@@ -629,50 +650,84 @@ contains
 
 
     ! Local variables
-    integer(4) :: iproc,k,kmin,kmax
+    integer(4) :: iproc,i,j,k
+    integer(4) :: k1,k2,kmin,kmax,Nk_proc
     integer(8) :: ip
-    real(8)    :: rbuf,rmax,kscale
-    real(8), dimension(2) :: p,pavg,psig,pmax,pmin
-  
+    real(8)    :: kavg,kscale,r,rbuf,rmax
+    real(8), dimension(3) :: p,pavg,psig,pmax,pmin,x
+
 
     ! Timing variables
     integer(4) :: time1,time2
     time1 = time()
 
 
-    ! Redshift shell
-    ! Buffer in Mpc/h for LPT particle displacement
-    rbuf = 10
-    rmax = cmb%ray(cmb%iz)%r(3) + rbuf
-    kmax = 1 + int(rmax*unit%box_to_mesh)
-    kmin = -kmax + 1
+    ! Buffer for LPT particle displacement
+    rbuf = 0
+    
+    !$omp parallel do        &
+    !$omp default(shared)    &
+    !$omp private(i,j,k,r,x) &
+    !$omp reduction(max:rbuf)
+    do k=1,cmb%Nm1d
+       do j=1,cmb%Nm1d
+          do i=1,cmb%Nm1d
+             x    = dx_lpt(i,j,k)
+             r    = sqrt(sum(x**2))
+             rbuf = max(rbuf,r)
+          enddo
+       enddo
+    enddo
+    !$omp end parallel do
+    
 
+    ! Maximum radius [Mpc/h]
+    rbuf = rbuf*unit%mesh_to_box
+    rmax = cmb%ray(cmb%iz)%r(3) + rbuf
+
+
+    ! k latitudes
+    kmax    = 1 + int(rmax*unit%box_to_mesh)
+    kmin    = -kmax + 1    
+    Nk_proc = 2*kmax/cmb%Nproc + min(1,mod(2*kmax,cmb%Nproc))
 
     ! Maps
-    ! Loop over k latitudes
-    ! Skip to avoid thread collisions
-    !$omp parallel        &
-    !$omp default(shared) &
-    !$omp private(k)
-    !$omp do schedule(dynamic,1)
-    do k=kmin,kmax,2
-       call map_make(k)
+    ! Loop over k latitudes in blocks to avoid thread collisions
+    !$omp parallel do          &
+    !$omp default(shared)      &
+    !$omp private(iproc,k,k1,k2)
+    do iproc=1,cmb%Nproc
+       k1 = kmin + (iproc-1)*Nk_proc
+       k2 = min(kmin - 1 + iproc*Nk_proc,kmax)
+       do k=k1,k2
+          call map_make(k)
+       enddo
     enddo
-    !$omp end do
-    !$omp do schedule(dynamic,1)
-    do k=kmin+1,kmax,2
-       call map_make(k)
-    enddo
-    !$omp end do    
-    !$omp end parallel
+    !$omp end parallel do
 
+
+    ! kappa
+    kavg = 0
+    
+    !$omp parallel do       &
+    !$omp default(shared)   &
+    !$omp private(iproc,ip) &
+    !$omp reduction(+:kavg)
+    do iproc=1,cmb%Nproc
+       do ip=cmb%proc(1,iproc),cmb%proc(2,iproc)
+          kavg = kavg + cmb%kap(ip)
+       enddo
+    enddo
+    !$omp end parallel do
+
+    kavg = kavg/cmb%Npix
+    
 
     ! Stats
-    pavg    = 0
-    psig    = 0
-    pmax    = 0
-    pmin(1) = huge(0.)
-    pmin(2) = 0
+    pavg = 0
+    psig = 0
+    pmax = 0
+    pmin = huge(0.)
     
     !$omp parallel do            &
     !$omp default(shared)        &
@@ -682,8 +737,13 @@ contains
     !$omp reduction(min:pmin)
     do iproc=1,cmb%Nproc
        do ip=cmb%proc(1,iproc),cmb%proc(2,iproc)
-          p(1) = cmb%tau(ip)
-          p(2) = cmb%ksz(ip)
+          ! Subtract homogeneous term
+          cmb%kap(ip) = cmb%kap(ip) - kavg
+          
+          ! Stats
+          p(1) = cmb%kap(ip)
+          p(2) = cmb%tau(ip)
+          p(3) = cmb%ksz(ip)          
           pavg = pavg + p
           psig = psig + p**2
           pmax = max(pmax,p)
@@ -697,8 +757,9 @@ contains
     pavg   = pavg/cmb%Npix
     psig   = sqrt(psig/cmb%Npix - pavg**2)
     kscale = cosmo%Tcmb0*1E6
-    write(*,*) 'tau : ',real((/pavg(1),psig(1),pmin(1),pmax(1)/))
-    write(*,*) 'ksz : ',real((/pavg(2),psig(2),pmin(2),pmax(2)/)*kscale)
+    write(*,*) 'kap : ',real((/pavg(1),psig(1),pmin(1),pmax(1)/))
+    write(*,*) 'tau : ',real((/pavg(2),psig(2),pmin(2),pmax(2)/))
+    write(*,*) 'ksz : ',real((/pavg(3),psig(3),pmin(3),pmax(3)/)*kscale)
 
     
     time2 = time()
@@ -723,9 +784,9 @@ contains
       integer(4) :: i1,i2,j1,j2,k2
       integer(4) :: imin,imax,jmax
       integer(8) :: ipix
-      real(8)    :: a,z,dcom,dcom1,dcom2,dang
-      real(8)    :: r,phi,theta,omega_str,area
-      real(8)    :: dtau,dksz,mue,tau,tau1,tau2,vlos
+      real(8)    :: a,z,dcom,dcom1,dcom2,dr,dang
+      real(8)    :: r,phi,theta,omega,area,vol
+      real(8)    :: dkap,dksz,dtau,mue,tau,tau1,tau2,wk,wk1,wk2,vlos
       real(8)    :: rmin,rmax,rminsq,rmaxsq,xmin,xmax,ymax,ysq,zsq
       real(8), dimension(3) :: x,x1,x2,v
 
@@ -737,19 +798,25 @@ contains
       dcom  = cmb%ray(cmb%iz)%r(2)
       dcom2 = cmb%ray(cmb%iz)%r(3)
       tau1  = cmb%ray(cmb%iz)%tau(1)
-      tau2  = cmb%ray(cmb%iz)%tau(3)      
+      tau2  = cmb%ray(cmb%iz)%tau(3)
+      wk1   = cmb%ray(cmb%iz)%wk(1)
+      wk2   = cmb%ray(cmb%iz)%wk(3)  
+
+
+      ! dr [comoving Mpc/h]
+      ! dang [Mpc/h]
+      ! omega [steradians
+      ! area, vol [proper cgs]
+      dr    = dcom2 - dcom1
       dang  = a*dcom
+      omega = 4*pi/cmb%Npix
+      area  = omega*(dang*Mpc2cm/cosmo%h)**2
+      vol   = area *(a*dr*Mpc2cm/cosmo%h)
 
 
-      ! Pixel
-      ! area in proper cm^2
-      ! sig_str in Msolar/steradian
-      omega_str = 4*pi/cmb%Npix
-      area      = omega_str*(dang/cosmo%h*Mpc2cm)**2
-
-
-      ! tau, ksz
+      ! kappa, tau, ksz
       mue  = mH_cgs/(cosmo%XH + cosmo%YHe/4)
+      dkap = unit%mass/vol/cosmo%rhom*dr
       dtau =  sT_cgs*unit%mgas/mue/area
       dksz = -sT_cgs/c_cgs*unit%vel*unit%mgas/mue/area
 
@@ -763,6 +830,8 @@ contains
 
 
       ! Loop over block
+      ! x1 = absolute coordinates in lightcone
+      ! x2 = relative coordinates in mesh
       k2    = 1 + mod(mod(k1,cmb%Nm1d) - 1 + cmb%Nm1d,cmb%Nm1d)
       x1(3) = k1 - 0.5
       x2(3) = floor(x1(3)/cmb%Nm1d)*cmb%Nm1d
@@ -785,8 +854,9 @@ contains
                i2    = 1 + mod(mod(i1,cmb%Nm1d) - 1 + cmb%Nm1d,cmb%Nm1d)
                x1(1) = i1 - 0.5
                x2(1) = floor(x1(1)/cmb%Nm1d)*cmb%Nm1d
-               
-               ! Particle in part/mesh units
+
+               ! part/mesh coordinates
+               ! x_lpt is periodic
                x = x_lpt(i2,j2,k2)
                v = v_lpt(i2,j2,k2)
                i = 1 + int(x(1))
@@ -794,6 +864,8 @@ contains
                k = 1 + int(x(3))
       
                ! Lightcone coordinates in Mpc/h
+               ! xnp_lpt is non-periodic
+               x = xnp_lpt(i2,j2,k2)
                x = (x + x2)*unit%mesh_to_box
                r = sqrt(sum(x**2))
 
@@ -803,10 +875,14 @@ contains
                   call vec2ang(x,theta,phi)
                   call ang2pix_ring(cmb%Nside,theta,phi,ipix)
 
+                  ! Lensing
+                  wk = wk1 + (wk2-wk1)*(r-dcom1)/dr
+                  cmb%kap(ipix) = cmb%kap(ipix) + wk*dkap
+
                   ! Ionized
                   if (z < reion%zre(i,j,k)) then
                      vlos = sum(v*x)
-                     tau  = tau1 + (tau2-tau1)*(r-dcom1)/(dcom2-dcom1)
+                     tau  = tau1 + (tau2-tau1)*(r-dcom1)/dr
                      cmb%tau(ipix) = cmb%tau(ipix) + dtau
                      cmb%ksz(ipix) = cmb%ksz(ipix) + dksz*vlos*exp(-tau)
                   endif
@@ -814,6 +890,7 @@ contains
             endif
          enddo
       enddo
+
 
       return
     end subroutine map_make
@@ -831,7 +908,7 @@ contains
     integer(4)     :: l,un
     character(100) :: fn
     real(8), dimension(2) :: zb
-    real(8), allocatable, dimension(:,:) :: rw,cl_tau,cl_ksz
+    real(8), allocatable, dimension(:,:) :: rw,cl_kap,cl_ksz,cl_tau
 
 
     ! Timing variables
@@ -840,6 +917,7 @@ contains
 
 
     ! Allocate
+    allocate(cl_kap(0:cmb%Nlmax,1:1))
     allocate(cl_tau(0:cmb%Nlmax,1:1))
     allocate(cl_ksz(0:cmb%Nlmax,1:1))
     allocate(rw(    2*cmb%Nside,1:1))
@@ -849,6 +927,9 @@ contains
     rw = 1D0
     zb = (/-1D0,1D0/)
 
+    call map2alm(cmb%Nside,cmb%Nlmax,cmb%Nmmax,cmb%kap,cmb%alm,zb,rw)
+    call alm2cl( cmb%Nlmax,cmb%Nmmax,cmb%alm,cl_kap)
+
     call map2alm(cmb%Nside,cmb%Nlmax,cmb%Nmmax,cmb%tau,cmb%alm,zb,rw)
     call alm2cl( cmb%Nlmax,cmb%Nmmax,cmb%alm,cl_tau)
 
@@ -856,7 +937,21 @@ contains
     call alm2cl( cmb%Nlmax,cmb%Nmmax,cmb%alm,cl_ksz)
 
 
-    ! Write tau
+    ! kappa
+    un = 11
+    fn = trim(cmb%dirout)//'cl_kappa_healpix.txt'
+    write(*,*) 'Writing ',trim(fn)
+    
+    open(11,file=fn)
+    write(un,'(a6,a14)') 'l','C_l'
+
+    do l=1,cmb%Nlmax
+       write(un,'(i6,es14.6)') l,cl_kap(l,1)
+    enddo
+    close(un)
+
+    
+    ! tau
     un = 11
     fn = trim(cmb%dirout)//'cl_tau_healpix.txt'
     write(*,*) 'Writing ',trim(fn)
@@ -870,7 +965,7 @@ contains
     close(un)
 
 
-    ! Write ksz
+    ! ksz
     un = 11
     fn = trim(cmb%dirout)//'cl_ksz_healpix.txt'
     write(*,*) 'Writing ',trim(fn)

@@ -179,7 +179,7 @@ contains
 ! Functions
 !------------------------------------------------------------------------------!
 
-
+  
   function x_lpt(i,j,k)
     ! Default
     implicit none
@@ -218,4 +218,41 @@ contains
   end function v_lpt
 
 
+  function dx_lpt(i,j,k)
+    ! Default
+    implicit none
+
+
+    ! Function arguments
+    integer(4) :: i,j,k
+    real(8)    :: dx_lpt(3)
+
+
+    ! Calculate position in grid units
+    dx_lpt = -cosmo%D1*lpt%gradphi(1:3,i,j,k) &
+             +cosmo%D2*lpt%gradphi(4:6,i,j,k)
+
+    return
+  end function dx_lpt
+
+
+  function xnp_lpt(i,j,k)
+    ! Default
+    implicit none
+
+
+    ! Function arguments
+    integer(4) :: i,j,k
+    real(8)    :: xnp_lpt(3)
+
+
+    ! Calculate position in grid units
+    xnp_lpt = (/i,j,k/) - 0.5                 &
+            - cosmo%D1*lpt%gradphi(1:3,i,j,k) &
+            + cosmo%D2*lpt%gradphi(4:6,i,j,k)
+
+    return
+  end function xnp_lpt
+
+  
 end module lpt_module

@@ -11,7 +11,7 @@ module cmb_module
   ! Modules
   use constant_module
   use timing_module
-  use cosmo_module, only : cosmo
+  use cosmo_module, only : cosmo,dcom_of_z
   use input_module, only : input
   use reion_module, only : reion,xi_of_z
   use sim_module  , only : sim,unit
@@ -24,7 +24,7 @@ module cmb_module
 
   ! Types
   type ray_type
-     real(8), dimension(3) :: z,a,r,xe,tau
+     real(8), dimension(3) :: z,a,r,xe,tau,wk
   end type ray_type
 
   
@@ -41,8 +41,9 @@ module cmb_module
      ! Arrays
      type(ray_type), allocatable, dimension(:)     :: ray
      integer(4)    , allocatable, dimension(:)     :: l
-     real(8)       , allocatable, dimension(:)     :: k,Pmm,Pee,Pqq,Ctau,Cksz
-     real(8)       , allocatable, dimension(:)     :: tau,ksz
+     real(8)       , allocatable, dimension(:)     :: k,Pmm,Pee,Pqq
+     real(8)       , allocatable, dimension(:)     :: Ckap,Cksz,Ctau
+     real(8)       , allocatable, dimension(:)     :: kap,ksz,tau
      real(4)       , allocatable, dimension(:,:)   :: fits
      integer(8)    , allocatable, dimension(:,:)   :: proc
      complex(8)    , allocatable, dimension(:,:,:) :: alm
@@ -108,16 +109,18 @@ contains
     allocate(cmb%Pee(cmb%Nm1d))
     allocate(cmb%Pqq(cmb%Nm1d))
     allocate(cmb%l(   cmb%lmin:cmb%lmax))
-    allocate(cmb%Ctau(cmb%lmin:cmb%lmax))
+    allocate(cmb%Ckap(cmb%lmin:cmb%lmax))
     allocate(cmb%Cksz(cmb%lmin:cmb%lmax))
-
+    allocate(cmb%Ctau(cmb%lmin:cmb%lmax))
+    
 
     ! Init
     cmb%Pmm  = 0
     cmb%Pee  = 0
     cmb%Pqq  = 0
-    cmb%Ctau = 0
+    cmb%Ckap = 0
     cmb%Cksz = 0
+    cmb%Ctau = 0
 
     do k=1,cmb%Nm1d
        cmb%k(k) = 2*pi/cosmo%Lbox*k
@@ -144,8 +147,9 @@ contains
 
        
        ! Allocate
-       allocate(cmb%tau( 0:cmb%Npix-1))
+       allocate(cmb%kap( 0:cmb%Npix-1))
        allocate(cmb%ksz( 0:cmb%Npix-1))
+       allocate(cmb%tau( 0:cmb%Npix-1))
        allocate(cmb%fits(0:cmb%Npix-1,1))
        allocate(cmb%alm(1:1,0:cmb%Nlmax,0:cmb%Nmmax))
        allocate(cmb%proc(2,cmb%Nproc))
@@ -163,12 +167,17 @@ contains
        !$omp end do
        !$omp do
        do iproc=1,cmb%Nproc
-          cmb%tau(cmb%proc(1,iproc):cmb%proc(2,iproc)) = 0
+          cmb%kap(cmb%proc(1,iproc):cmb%proc(2,iproc)) = 0
        enddo
        !$omp end do
        !$omp do
        do iproc=1,cmb%Nproc
           cmb%ksz(cmb%proc(1,iproc):cmb%proc(2,iproc)) = 0
+       enddo
+       !$omp end do
+       !$omp do
+       do iproc=1,cmb%Nproc
+          cmb%tau(cmb%proc(1,iproc):cmb%proc(2,iproc)) = 0
        enddo
        !$omp end do
        !$omp do
@@ -211,6 +220,20 @@ contains
     time1 = time()
 
 
+    ! kappa
+    un = 11
+    fn = trim(cmb%dirout)//'cl_kappa.txt'
+    write(*,*) 'Writing ',trim(fn)
+    
+    open(un,file=fn)
+    write(un,'(a6,a14)') 'l','C_l'
+    
+    do l=cmb%lmin,cmb%lmax
+       write(un,'(i6,es14.6)') cmb%l(l),cmb%Ckap(l)
+    enddo
+    close(un)
+
+
     ! tau
     un = 11
     fn = trim(cmb%dirout)//'cl_tau.txt'
@@ -225,7 +248,7 @@ contains
     close(un)
 
 
-    ! KSZ
+    ! ksz
     un = 11
     fn = trim(cmb%dirout)//'cl_ksz.txt'
     write(*,*) 'Writing ',trim(fn)
@@ -268,6 +291,24 @@ contains
 
     ! Nside tag
     write(Nside_str,'(i4)') cmb%Nside
+
+
+    ! kappa map
+    !$omp parallel do &
+    !$omp default(shared) &
+    !$omp private(iproc)
+    do iproc=1,cmb%Nproc
+       cmb%fits(cmb%proc(1,iproc):cmb%proc(2,iproc),1) = &
+        cmb%kap(cmb%proc(1,iproc):cmb%proc(2,iproc))
+    enddo
+    !$omp end parallel do
+
+    fn = trim(cmb%dirout)//'map_kappa_nside='//trim(Nside_str)//'.fits'
+    header = ''
+
+    call write_minimal_header(header,'MAP',nside=cmb%Nside,ordering='RING', &
+         coordsys='C',units='')
+    call write_bintab(cmb%fits,cmb%Npix,1,header,L_header,'!'//trim(fn))
 
 
     ! tau map
@@ -366,7 +407,7 @@ contains
     a1 = 1/(1 + z1)
     a2 = 1/(1 + z2)
     N  = 2*(ceiling(abs(a2-a1)/1E-6/2,kind=8))
-    da = (a2 - a1)/N
+    da = (a2 - a1)/max(N,1)
     
 
     ! Integrate using Simpson's rule
@@ -410,5 +451,34 @@ contains
     
   end function tau_of_z
 
-  
+
+  function wkap_of_z(z)
+    ! Default
+    implicit none
+
+    ! Function arguments
+    real(8) :: z
+    real(8) :: wkap_of_z
+
+    ! Local variables
+    real(8) :: dcom
+
+
+    ! CMB
+    ! See cosmo.f90
+    ! cosmo%drec = comoving distance to zrec [Mpc/h]
+
+    
+    ! Comoving distance [Mpc/h]
+    dcom = dcom_of_z(0D0,0D0,z)
+    
+
+    ! Lensing kernel
+    wkap_of_z = 1.5*cosmo%om*(1E7/c_cgs)**2 &
+              * (1+z)*dcom*(cosmo%drec - dcom)/cosmo%drec
+    
+    return
+  end function wkap_of_z
+
+
 end module cmb_module

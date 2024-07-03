@@ -114,8 +114,8 @@ contains
     ! Spline
     allocate(spline%x(cosmo%Nk))
     allocate(spline%y(cosmo%Nk))
-    spline%x = cosmo%Plin(1,:)
-    spline%y = cosmo%Plin(3,:)
+    spline%x = log(cosmo%Plin(1,:))
+    spline%y = log(cosmo%Plin(3,:))
     call spline_construct(spline)
 
 
@@ -152,8 +152,8 @@ contains
                 endif
 
                 ! Interpolate
-                x  = kr*lpt%Nm1d/cosmo%Lbox
-                y  = spline_interp(spline,x)
+                x  = log(kr*lpt%Nm1d/cosmo%Lbox)
+                y  = exp(spline_interp(spline,x))
                 p1 = (2*pi**2/kr**3)*y(1)
 
                 ! Fourier mode
