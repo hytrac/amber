@@ -48,7 +48,7 @@ contains
 
     ! Subroutine arguments
     character  :: c
-    real(8), dimension(:,:,:) :: a
+    real(8), target, dimension(:,:,:) :: a
 
 
     ! Local variables
