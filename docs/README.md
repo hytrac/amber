@@ -89,6 +89,16 @@ Reion input parameters:
 
 <br>
 
+output/reion/xi.dat is the reionization history.
+
+First line is a header. The four columns are:
+1) z = redshift
+2) x_i = ionization fraction from Weibull function
+3) x_m = mass-weighted ionization fraction
+4) x_v = volume-weighted ionization fraction
+
+<br>
+
 output/reion/zre.dat is a single-precision binary file containing the zre field.
 
 # Gaussian Random Field (GRF)
