@@ -30,7 +30,6 @@ module reion_module
      real(8)       :: zbeg,zear,zlat,zend
      real(8)       :: xbeg,xend
      real(8)       :: awb,bwb,cwb
-     real(8)       :: xi,xim,xiv
      ! Arrays
      real(4), allocatable, dimension(:,:,:) :: zre
      ! Pointers

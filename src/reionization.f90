@@ -535,43 +535,70 @@ contains
 
 
     ! Local variables
-    integer(4) :: i,j,k
-    real(8)    :: xim,xiv
-
+    integer(4)    :: i,j,k,iz,Nz,un
+    real(8)       :: g,z,zmin,zmax,zdel
+    character(80) :: fn
+    real(8), allocatable, dimension(:,:) :: xi
+    
 
     ! Timing variables
     integer(4) :: time1,time2
     time1 = time()
 
 
-    ! Mass-weighted and volume-weighted ionization fractions
-    xim = 0
-    xiv = 0
+    ! Allocate
+    zdel = 1D-2
+    zmin = floor(  reion%zend/zdel)*zdel
+    zmax = ceiling(reion%zbeg/zdel)*zdel
+    Nz   = nint((zmax - zmin)/zdel)
+    allocate(xi(6,Nz))
+    xi = 0
 
-    !$omp parallel do        &
-    !$omp default(shared)    &
-    !$omp private(i,j,k)     &
-    !$omp reduction(+:xim,xiv)
+
+    ! Reionization redshifts
+    !$omp parallel do         &
+    !$omp default(shared)     &
+    !$omp private(i,j,k,iz,z) &
+    !$omp reduction(+:xi)
     do k=1,reion%Nm1d
        do j=1,reion%Nm1d
           do i=1,reion%Nm1d
-             ! Sum only ionized
-             if (cosmo%z <= reion%zre(i,j,k)) then
-                xim = xim + mesh%rho1(i,j,k)
-                xiv = xiv + 1
-             endif
+             ! Reionization redshift
+             z  = reion%zre(i,j,k)
+             iz = min(ceiling((z - zmin)/zdel),Nz)
+             xi(5,iz) = xi(5,iz) + 1
+             xi(6,iz) = xi(6,iz) + (mesh%rho1(i,j,k) - 1)
           enddo
        enddo
     enddo
     !$omp end parallel do
 
+    
+    ! Mass-weighted and volume-weighted ionization fractions
+    do iz=Nz-1,1,-1
+       xi(5:6,iz) = xi(5:6,iz) + xi(5:6,iz+1)       
+    enddo
+    do iz=1,Nz
+       z = (iz-1)*zdel + zmin
+       g = (1 + cosmo%z)/(1 + z)
+       xi(1,iz) = z
+       xi(2,iz) = xi_of_z(z)
+       xi(3,iz) = (xi(5,iz) + g*xi(6,iz))/reion%Nmesh
+       xi(4,iz) =  xi(5,iz)              /reion%Nmesh
+    enddo
 
-    ! Save and write to screen
-    reion%xi  = xi_of_z(cosmo%z)
-    reion%xim = xim/reion%Nmesh
-    reion%xiv = xiv/reion%Nmesh
-    write(*,*) 'xi : ',real((/reion%xi,reion%xim,reion%xiv/))
 
+    ! Write to file
+    un = 11
+    fn = trim(reion%dirout)//'xi.txt'
+    write(*,*) 'Writing ',trim(fn)
+    open(un,file=fn)
+    write(un,'(a5,3a14)') 'z','x_i','x_m','x_v'
+    do iz=1,Nz
+       write(un,'(f5.2,3es14.6)') xi(1:4,iz)
+    enddo
+    close(un)
+    
     
     time2 = time()
     write(*,'(2a)') timing(time1,time2),' : REION ionization fraction'
