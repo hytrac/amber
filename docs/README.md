@@ -89,7 +89,7 @@ Reion input parameters:
 
 <br>
 
-output/reion/xi.dat is the reionization history.
+output/reion/xi.txt is the reionization history.
 
 First line is a header. The four columns are:
 1) z = redshift
