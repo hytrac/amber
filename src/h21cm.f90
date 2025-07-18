@@ -143,6 +143,30 @@ contains
     
     return
   end function xH_of_z
-  
+
+
+  function Tb_of_z(z)
+    ! Default
+    implicit none
+
+    ! Function arguments
+    real(8) :: z
+    real(8) :: Tb_of_z
+    
+    ! Local variables
+    real(8) :: T0,xH
+
+    ! 21cm
+    ! e.g. Madau et al (1997)
+    T0 = 28*(cosmo%ob*cosmo%h**2/0.022)*sqrt(0.15/(cosmo%om*cosmo%h**2))
+
+    ! Neutral fraction
+    xH = XH_of_z(z)
+
+    ! Brightness temperature
+    Tb_of_z = T0*xH*sqrt((1+z)/10)
+
+  end function Tb_of_z
+
 
 end module h21cm_module

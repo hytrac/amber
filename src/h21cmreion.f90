@@ -71,7 +71,7 @@ contains
 
     ! Local variables
     integer(4)    :: iz,Nz,un
-    real(8)       :: xH,Tb,T0,z,dz
+    real(8)       :: xH,Tb,T0,z,zmin,zmax,zdel
     character(80) :: fn
 
 
@@ -85,13 +85,10 @@ contains
 
 
     ! Init
-    dz = 0.01
-    Nz = nint((reion%zbeg - reion%zend)/dz)
-
-
-    ! 21cm
-    ! e.g. Madau et al (1997)
-    T0 = 28*(cosmo%ob*cosmo%h**2/0.022)*sqrt(0.15/(cosmo%om*cosmo%h**2))
+    zdel = 1D-2
+    zmin = floor(  reion%zend/zdel)*zdel
+    zmax = ceiling(reion%zbeg/zdel)*zdel
+    Nz   = nint((zmax - zmin)/zdel)
 
 
     ! Write
@@ -104,20 +101,21 @@ contains
     
     do iz=1,Nz
        ! Redshift
-       z = (iz - 1)*dz + reion%zend
+       z = (iz - 1)*zdel + zmin
        
        ! HI fraction
        xH = xH_of_z(z)
 
        ! Brightness temperature
-       Tb = T0*xH*sqrt((1+z)/10)
+       Tb = Tb_of_z(z)
 
        ! IO
-       write(un,'(f5.2,2es14.6)') z,xH,Tb
+       write(un,'(f5.2,2es14.6)') real((/z,xH,Tb/))
     enddo
 
     close(un)
     
+    stop
     
     time2 = time()
     write(*,'(2a)') timing(time1,time2),' : 21cm global'
