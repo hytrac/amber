@@ -33,10 +33,11 @@ module h21cm_module
      integer(4)    :: iz,Nz
      integer(8)    :: Nmesh
      ! Arrays
-     real(8)       , allocatable, dimension(:) :: k,Pmm,Phh,PTT
-     type(ray_type), allocatable, dimension(:) :: ray
+     real(8)       , allocatable, dimension(:)     :: k,Pmm,Phh,PTT
+     type(ray_type), allocatable, dimension(:)     :: ray
+     real(4)       , allocatable, dimension(:,:,:) :: Tb1
      ! Pointers
-     real(8), pointer, dimension(:,:,:) :: rhom,rhoh,Tb
+     real(8), pointer, dimension(:,:,:) :: rhom,rhoh,Tb2
   end type h21_type
 
 
@@ -93,6 +94,18 @@ contains
        h21cm%k(k) = 2*pi/cosmo%Lbox*k
     enddo
 
+
+    ! First touch in parallel
+    !$omp parallel        &
+    !$omp default(shared) &
+    !$omp private(k)
+    !$omp do
+    do k=1,h21cm%Nm1d
+       h21cm%Tb1(:,:,k) = 0
+    enddo
+    !$omp end do
+    !$omp end parallel
+
     
     time2 = time()
     write(*,'(2a)') timing(time1,time2),' : 21cm init'
@@ -124,7 +137,7 @@ contains
     fn = trim(h21cm%dirout)//'Tb_'//trim(sim%fstr)//'.dat'
     write(*,*) 'Writing ',trim(fn)
     open(un,file=fn,form='binary')
-    write(un) h21cm%Tb(1:h21cm%Nm1d,:,:)
+    write(un) h21cm%Tb1
     close(un)
 
     

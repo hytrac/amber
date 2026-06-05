@@ -38,7 +38,7 @@ contains
     ! Pointers
     h21cm%rhom => mesh%fft1
     h21cm%rhoh => mesh%fft2
-    h21cm%Tb   => mesh%fft3
+    h21cm%Tb2  => mesh%fft3
 
 
     ! Global 21cm
@@ -291,8 +291,8 @@ contains
       ! Ignore peculiar vel, lightcone effects
 
 
-      ! Use interlaced and deconvolved fields
-      ! mesh%rho2
+      ! Use mesh%rho1 for real space Tb1
+      ! Use mesh%rho2 for Fourier space Tb2
 
 
       ! Allocate
@@ -326,10 +326,12 @@ contains
                ! Neutral?
                if (cosmo%z > reion%zre(i,j,k)) then
                   h21cm%rhoh(i,j,k) =    mesh%rho2(i,j,k)
-                  h21cm%Tb(  i,j,k) = Tb*mesh%rho2(i,j,k)
+                  h21cm%Tb1( i,j,k) = Tb*mesh%rho1(i,j,k)
+                  h21cm%Tb2( i,j,k) = Tb*mesh%rho2(i,j,k)
                else
                   h21cm%rhoh(i,j,k) = 0
-                  h21cm%Tb(  i,j,k) = 0
+                  h21cm%Tb1( i,j,k) = 0
+                  h21cm%Tb2( i,j,k) = 0
                endif
             enddo
          enddo
@@ -337,7 +339,7 @@ contains
 
       call fft_3d(h21cm%rhom,'f')
       call fft_3d(h21cm%rhoh,'f')
-      call fft_3d(h21cm%Tb  ,'f')
+      call fft_3d(h21cm%Tb2 ,'f')
 
       !$omp parallel do                            & 
       !$omp default(shared)                        &
@@ -377,8 +379,8 @@ contains
                            *h21cm%rhom(i:ip,j,k)/mesh%Nmesh)
                   phh = sum(h21cm%rhoh(i:ip,j,k)/mesh%Nmesh &
                            *h21cm%rhoh(i:ip,j,k)/mesh%Nmesh)
-                  ptt = sum(h21cm%Tb(  i:ip,j,k)/mesh%Nmesh &
-                           *h21cm%Tb(  i:ip,j,k)/mesh%Nmesh)
+                  ptt = sum(h21cm%Tb2( i:ip,j,k)/mesh%Nmesh &
+                           *h21cm%Tb2( i:ip,j,k)/mesh%Nmesh)
                   phm = sum(h21cm%rhoh(i:ip,j,k)/mesh%Nmesh &
                            *h21cm%rhom(i:ip,j,k)/mesh%Nmesh)
 
@@ -435,10 +437,6 @@ contains
       
       close(un)
 
-
-      ! Inverse FFT for output
-      call fft_3d(h21cm%Tb,'b')
-      
       
       time2 = time()
       write(*,'(2a)') timing(time1,time2),' : 21cm simple'
