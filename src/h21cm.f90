@@ -83,7 +83,7 @@ contains
     allocate(h21cm%Pmm(h21cm%Nm1d))
     allocate(h21cm%Phh(h21cm%Nm1d))
     allocate(h21cm%PTT(h21cm%Nm1d))
-    allocate(h21cm%Tb1( h21cm%Nm1d,h21cm%Nm1d,h21cm%Nm1d))
+    allocate(h21cm%Tb1(h21cm%Nm1d,h21cm%Nm1d,h21cm%Nm1d))
 
 
     ! Init
