@@ -434,6 +434,10 @@ contains
       enddo
       
       close(un)
+
+
+      ! Inverse FFT for output
+      call fft_3d(h21cm%Tb,'b')
       
       
       time2 = time()

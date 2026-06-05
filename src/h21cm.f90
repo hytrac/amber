@@ -110,13 +110,22 @@ contains
 
 
     ! Local variables
-    integer(4)    :: i,un
+    integer(4)    :: un
     character(80) :: fn
     
     
     ! Timing variables
     integer(4) :: time1,time2
     time1 = time()
+
+
+    ! Write brightness temperature
+    un = 11
+    fn = trim(h21cm%dirout)//'Tb_'//trim(sim%fstr)//'.dat'
+    write(*,*) 'Writing ',trim(fn)
+    open(un,file=fn,form='binary')
+    write(un) h21cm%Tb(1:h21cm%Nm1d,:,:)
+    close(un)
 
     
     time2 = time()
