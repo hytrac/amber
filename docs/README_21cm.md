@@ -40,6 +40,7 @@ First line is a header. The various columns are:
 5) b_hm = HI-matter bias
 6) r_hm = HI-matter cross correlation
 
+output/21cm/Tb.dat is a single-precision binary file containing the brightness temperature field.
 
 # References
 
