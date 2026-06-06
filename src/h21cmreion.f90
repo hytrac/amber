@@ -49,10 +49,6 @@ contains
     call h21cm_reion
 
     
-    ! IO
-    if (h21cm%make == 'write') call h21cm_write
-
-    
     time2 = time()
     write(*,'(2a)') timing(time1,time2),' : 21cm make'
     return
@@ -114,8 +110,7 @@ contains
     enddo
 
     close(un)
-    
-    stop
+
     
     time2 = time()
     write(*,'(2a)') timing(time1,time2),' : 21cm global'
@@ -174,6 +169,10 @@ contains
        ! Assume Ts >> Tcmb
        ! Ignore peculiar vel, lightcone effects
        call h21cm_simple
+
+
+       ! IO
+       if (h21cm%make == 'write') call h21cm_write
     enddo
 
 
